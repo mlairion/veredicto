@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veredicto</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #111;
+  --bg2: #1a1a1a;
+  --bg3: #222;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #f0f0f0;
+  --text2: #999;
+  --text3: #555;
+  --accent: #3483fa;
+  --accent-dark: #2968c8;
+  --best: #22c55e;
+  --best-bg: #052010;
+  --worst-bg: #1a0505;
+  --yellow: #ffe400;
+  --radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 10px; }
+.logo {
+  background: var(--yellow);
+  color: #111;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 6px;
+  letter-spacing: -0.3px;
+}
+.header h1 { font-size: 15px; font-weight: 600; color: var(--text); }
+.header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* PRICE FILTER */
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 5px 10px;
+}
+.filter-group label { font-size: 11px; color: var(--text2); white-space: nowrap; }
+.filter-input {
+  width: 90px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+.filter-input::placeholder { color: var(--text3); }
+.filter-sep { color: var(--text3); font-size: 12px; }
+.btn-filter {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .1s;
+  white-space: nowrap;
+}
+.btn-filter:hover { background: var(--accent-dark); }
+.btn-clear {
+  background: var(--bg3);
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .1s;
+  white-space: nowrap;
+}
+.btn-clear:hover { color: var(--text); border-color: #555; }
+
+/* PRODUCT COUNT */
+.product-count {
+  font-size: 11px;
+  color: var(--text2);
+  padding: 5px 0;
+  white-space: nowrap;
+}
+.product-count span { color: var(--accent); font-weight: 600; }
+
+/* HIDDEN NOTICE */
+.hidden-notice {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 20px;
+  font-size: 11px;
+  color: var(--text2);
+  display: none;
+}
+.hidden-notice.visible { display: block; }
+
+/* TABLE WRAPPER */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+  padding-bottom: 40px;
+}
+
+/* COMPARISON TABLE */
+.cmp-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+}
+
+/* SPEC LABEL COLUMN */
+.col-spec {
+  position: sticky;
+  left: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border2);
+  z-index: 10;
+  width: 160px;
+  min-width: 140px;
+  max-width: 180px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+}
+.col-spec.header-spec {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border2);
+  vertical-align: bottom;
+  padding-bottom: 12px;
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* PRODUCT COLUMN */
+.col-product {
+  min-width: 190px;
+  max-width: 220px;
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+  vertical-align: top;
+}
+.col-product:last-child { border-right: none; }
+
+/* PRODUCT HEADER CARD */
+.product-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.product-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;
+  padding: 4px;
+  align-self: center;
+}
+.product-img-placeholder {
+  width: 80px;
+  height: 80px;
+  background: var(--bg3);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  align-self: center;
+}
+.product-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-price {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+.product-price.best-price { color: var(--best); }
+.product-price.worst-price { color: #f87171; }
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text2);
+}
+.star { color: var(--yellow); }
+.rating-val { color: var(--text); font-weight: 600; }
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.btn-link {
+  font-size: 11px;
+  color: var(--accent);
+  text-decoration: none;
+  padding: 3px 7px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  transition: all .1s;
+}
+.btn-link:hover { background: var(--accent); color: #fff; }
+.btn-remove {
+  font-size: 11px;
+  color: var(--text3);
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .1s;
+}
+.btn-remove:hover { color: #f87171; border-color: #f87171; }
+
+/* TABLE ROWS */
+.cmp-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+.cmp-table tbody tr:hover .col-value { background: rgba(255,255,255,.02); }
+.cmp-table tbody tr:hover .col-spec { background: #1f1f1f; }
+
+/* VALUE CELLS */
+.col-value {
+  padding: 9px 14px;
+  font-size: 12px;
+  color: var(--text);
+  border-right: 1px solid var(--border);
+  vertical-align: middle;
+  text-align: left;
+}
+.col-value:last-child { border-right: none; }
+.col-value.best-val {
+  background: var(--best-bg);
+  color: var(--best);
+  font-weight: 600;
+}
+.col-value.empty-val { color: var(--text3); font-style: italic; }
+.col-value.all-same { color: var(--text3); }
+
+/* ROW TYPES */
+tr.row-price .col-spec { color: var(--text); font-weight: 600; }
+tr.row-rating .col-spec { color: var(--text); font-weight: 500; }
+tr.row-separator { height: 6px; background: var(--bg); }
+tr.row-separator td { padding: 0; border: none; background: var(--bg); font-size: 10px; color: var(--text3); padding-left: 14px; padding-top: 10px; text-transform: uppercase; letter-spacing: 0.6px; }
+
+/* EMPTY STATE */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  gap: 12px;
+}
+.empty-icon { font-size: 52px; }
+.empty-state h2 { font-size: 18px; font-weight: 600; color: var(--text); }
+.empty-state p { font-size: 14px; color: var(--text2); line-height: 1.6; max-width: 380px; }
+.empty-steps {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 18px 24px;
+  text-align: left;
+  max-width: 380px;
+  width: 100%;
+  margin-top: 4px;
+}
+.empty-steps h3 { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.empty-steps ol { padding-left: 18px; display: flex; flex-direction: column; gap: 7px; }
+.empty-steps li { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.empty-steps li strong { color: var(--text); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #444; }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .header { padding: 10px 14px; gap: 8px; }
+  .filter-group { padding: 5px 8px; }
+  .filter-input { width: 70px; }
+  .table-wrap { padding: 12px; }
+  .col-spec { width: 120px; min-width: 110px; font-size: 11px; padding: 8px 10px; }
+  .col-product { min-width: 160px; padding: 10px; }
+  .col-value { padding: 8px 10px; }
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  transition: transform .3s ease;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.ok { border-color: var(--best); color: var(--best); }
+.toast.err { border-color: #f87171; color: #f87171; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">ML</div>
+    <h1>Veredicto</h1>
+  </div>
+  <div class="header-right">
+    <div class="filter-group">
+      <label>Precio</label>
+      <input class="filter-input" id="price-min" type="number" placeholder="mín" min="0">
+      <span class="filter-sep">—</span>
+      <input class="filter-input" id="price-max" type="number" placeholder="máx" min="0">
+      <button class="btn-filter" onclick="applyFilter()">Filtrar</button>
+    </div>
+    <div class="product-count" id="product-count" style="display:none">
+      <span id="count-visible">0</span> de <span id="count-total">0</span> productos
+    </div>
+    <button class="btn-clear" onclick="clearAll()" id="btn-clear" style="display:none">Limpiar todo</button>
+  </div>
+</div>
+
+<div class="hidden-notice" id="hidden-notice"></div>
+
+<div id="app"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'ml_comparador_products';
+
+let products = [];
+let filterMin = null;
+let filterMax = null;
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+
+function loadProducts() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    products = saved ? JSON.parse(saved) : [];
+  } catch(e) {
+    products = [];
+  }
+}
+
+function saveProducts() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+}
+
+function addProduct(p) {
+  const existing = products.findIndex(x => x.id === p.id);
+  if (existing >= 0) {
+    products[existing] = p;
+    showToast('Producto actualizado', 'ok');
+  } else {
+    products.push(p);
+    showToast('Producto agregado al comparador', 'ok');
+  }
+  saveProducts();
+}
+
+function removeProduct(id) {
+  products = products.filter(p => p.id !== id);
+  saveProducts();
+  render();
+}
+
+function clearAll() {
+  if (!confirm('¿Eliminar todos los productos del comparador?')) return;
+  products = [];
+  saveProducts();
+  filterMin = null;
+  filterMax = null;
+  document.getElementById('price-min').value = '';
+  document.getElementById('price-max').value = '';
+  render();
+}
+
+// ── PRICE PARSING ─────────────────────────────────────────────────────────────
+
+function parsePrice(str) {
+  if (!str && str !== 0) return null;
+  if (typeof str === 'number') return str;
+  // Argentine format: "$ 45.999" or "45.999" or "2.599.990"
+  const s = String(str).replace(/[^\d]/g, '');
+  const n = parseInt(s);
+  return isNaN(n) ? null : n;
+}
+
+function formatPrice(n) {
+  if (n == null) return null;
+  return '$ ' + n.toLocaleString('es-AR');
+}
+
+// ── FILTER ────────────────────────────────────────────────────────────────────
+
+function applyFilter() {
+  const minVal = document.getElementById('price-min').value;
+  const maxVal = document.getElementById('price-max').value;
+  filterMin = minVal ? parseInt(minVal) : null;
+  filterMax = maxVal ? parseInt(maxVal) : null;
+  render();
+}
+
+function getVisibleProducts() {
+  if (filterMin == null && filterMax == null) return products;
+  return products.filter(p => {
+    const price = parsePrice(p.price);
+    if (price == null) return true;
+    if (filterMin != null && price < filterMin) return false;
+    if (filterMax != null && price > filterMax) return false;
+    return true;
+  });
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+
+function render() {
+  const app = document.getElementById('app');
+  const visible = getVisibleProducts();
+  const hidden = products.filter(p => !visible.includes(p));
+
+  // Update header controls
+  const hasProducts = products.length > 0;
+  document.getElementById('btn-clear').style.display = hasProducts ? '' : 'none';
+  document.getElementById('product-count').style.display = hasProducts ? '' : 'none';
+  document.getElementById('count-visible').textContent = visible.length;
+  document.getElementById('count-total').textContent = products.length;
+
+  // Hidden notice
+  const notice = document.getElementById('hidden-notice');
+  if (hidden.length > 0) {
+    notice.textContent = `${hidden.length} producto${hidden.length > 1 ? 's' : ''} oculto${hidden.length > 1 ? 's' : ''} por el filtro de precio`;
+    notice.classList.add('visible');
+  } else {
+    notice.classList.remove('visible');
+  }
+
+  if (products.length === 0) {
+    app.innerHTML = renderEmptyState();
+    return;
+  }
+
+  if (visible.length === 0) {
+    app.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h2>Ningún producto en ese rango</h2>
+      <p>Ajustá el filtro de precio o hacé clic en <strong>Limpiar</strong> para ver todos.</p>
+    </div>`;
+    return;
+  }
+
+  app.innerHTML = `<div class="table-wrap">${renderTable(visible)}</div>`;
+}
+
+function renderEmptyState() {
+  return `<div class="empty-state">
+    <div class="empty-icon">📦</div>
+    <h2>No hay productos para comparar</h2>
+    <p>Instalá la extensión Chrome y navegá a cualquier producto en MercadoLibre para agregarlo acá.</p>
+    <div class="empty-steps">
+      <h3>Cómo usar</h3>
+      <ol>
+        <li>Instalá la extensión <strong>ML Comparador</strong> en Chrome</li>
+        <li>Abrí la página de un producto en <strong>mercadolibre.com.ar</strong></li>
+        <li>Hacé clic en el ícono de la extensión y después en <strong>"Agregar al comparador"</strong></li>
+        <li>Repetí con los productos que querés comparar</li>
+      </ol>
+    </div>
+  </div>`;
+}
+
+function renderTable(prods) {
+  // Collect all spec keys preserving order of first appearance
+  const specKeys = [];
+  const seenKeys = new Set();
+  prods.forEach(p => {
+    Object.keys(p.specs || {}).forEach(k => {
+      if (!seenKeys.has(k)) { seenKeys.add(k); specKeys.push(k); }
+    });
+  });
+
+  // Determine best price
+  const prices = prods.map(p => parsePrice(p.price)).filter(n => n != null);
+  const minPrice = prices.length ? Math.min(...prices) : null;
+  const maxPrice = prices.length && prices.length > 1 ? Math.max(...prices) : null;
+
+  // Determine best rating
+  const ratings = prods.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
+  const maxRating = ratings.length ? Math.max(...ratings) : null;
+
+  // Build table
+  let html = `<table class="cmp-table">`;
+
+  // HEADER ROW
+  html += `<thead><tr>`;
+  html += `<th class="col-spec header-spec">Característica</th>`;
+  prods.forEach(p => {
+    const price = parsePrice(p.price);
+    const isMin = price != null && price === minPrice && prices.length > 1;
+    const isMax = price != null && price === maxPrice && prices.length > 1;
+    const priceClass = isMin ? 'best-price' : isMax ? 'worst-price' : '';
+    const ratingVal = parseFloat(p.rating);
+    const isBestRating = !isNaN(ratingVal) && ratingVal === maxRating && ratings.length > 1;
+
+    const imgHtml = (p.photos && p.photos[0])
+      ? `<img class="product-img" src="${esc(p.photos[0])}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      + `<div class="product-img-placeholder" style="display:none">📦</div>`
+      : `<div class="product-img-placeholder">📦</div>`;
+
+    const ratingHtml = (p.rating || p.reviews)
+      ? `<div class="product-rating">
+          <span class="star">★</span>
+          ${p.rating ? `<span class="rating-val">${esc(p.rating)}</span>` : ''}
+          ${p.reviews ? `<span>(${esc(p.reviews)} opiniones)</span>` : ''}
+          ${isBestRating ? `<span style="color:var(--best);font-size:10px">✓ mejor</span>` : ''}
+        </div>`
+      : '';
+
+    html += `<th class="col-product">
+      <div class="product-header">
+        ${imgHtml}
+        <div class="product-name">${esc(p.title || 'Sin título')}</div>
+        <div class="product-price ${priceClass}">
+          ${formatPrice(price) || esc(p.price) || '—'}
+          ${isMin ? `<span style="font-size:11px;font-weight:400;color:var(--best)"> ✓ mejor precio</span>` : ''}
+        </div>
+        ${ratingHtml}
+        <div class="product-actions">
+          <a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>
+          <button class="btn-remove" onclick="removeProduct('${esc(p.id)}')">Quitar</button>
+        </div>
+      </div>
+    </th>`;
+  });
+  html += `</tr></thead>`;
+
+  // BODY
+  html += `<tbody>`;
+
+  // PRICE ROW
+  html += `<tr class="row-price">`;
+  html += `<td class="col-spec" style="color:var(--text);font-weight:500">Precio</td>`;
+  prods.forEach(p => {
+    const price = parsePrice(p.price);
+    const isBest = price != null && price === minPrice && prices.length > 1;
+    html += `<td class="col-value ${isBest ? 'best-val' : ''}">${formatPrice(price) || esc(p.price) || '—'}</td>`;
+  });
+  html += `</tr>`;
+
+  // RATING ROW
+  if (ratings.length > 0) {
+    html += `<tr class="row-rating">`;
+    html += `<td class="col-spec" style="color:var(--text);font-weight:500">Rating</td>`;
+    prods.forEach(p => {
+      const r = parseFloat(p.rating);
+      const isBest = !isNaN(r) && r === maxRating && ratings.length > 1;
+      const reviewsStr = p.reviews ? ` (${p.reviews})` : '';
+      html += `<td class="col-value ${isBest ? 'best-val' : ''}">
+        ${p.rating ? `★ ${esc(p.rating)}${reviewsStr}` : '<span class="empty-val">—</span>'}
+      </td>`;
+    });
+    html += `</tr>`;
+  }
+
+  // SEPARATOR
+  if (specKeys.length > 0) {
+    html += `<tr class="row-separator"><td colspan="${prods.length + 1}">Especificaciones técnicas</td></tr>`;
+  }
+
+  // SPEC ROWS
+  specKeys.forEach(key => {
+    const vals = prods.map(p => (p.specs || {})[key] || null);
+    const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
+    const allEmpty = vals.every(v => v == null);
+    if (allEmpty) return;
+
+    html += `<tr>`;
+    html += `<td class="col-spec">${esc(key)}</td>`;
+    vals.forEach(v => {
+      const cls = allSame ? 'all-same' : '';
+      html += `<td class="col-value ${cls}">${v ? esc(v) : '<span class="empty-val">—</span>'}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+  return html;
+}
+
+function esc(v) {
+  if (v == null) return '';
+  return String(v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2800);
+}
+
+// ── HASH IMPORT ───────────────────────────────────────────────────────────────
+
+function checkHash() {
+  const hash = location.hash;
+  if (!hash.startsWith('#import=')) return;
+  try {
+    const encoded = hash.slice('#import='.length);
+    const data = JSON.parse(decodeURIComponent(encoded));
+    if (data && data.title) {
+      addProduct(data);
+    }
+  } catch(e) {
+    showToast('Error al importar el producto', 'err');
+  }
+  // Clean URL without triggering reload
+  history.replaceState(null, '', location.pathname);
+  render();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
+loadProducts();
+checkHash();
+render();
+
+// Handle hash changes (e.g. extension opens new tab)
+window.addEventListener('hashchange', () => {
+  checkHash();
+  render();
+});
+
+// Allow Enter key on price filter
+document.getElementById('price-min').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilter(); });
+document.getElementById('price-max').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilter(); });
+</script>
+</body>
+</html>

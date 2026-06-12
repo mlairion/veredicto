@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Veredicto</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #111; --bg2: #1a1a1a; --bg3: #222;
+  --border: #2a2a2a; --border2: #333;
+  --text: #f0f0f0; --text2: #999; --text3: #555;
+  --accent: #3483fa; --accent-dark: #2968c8;
+  --green-text: #22c55e; --green-bg: #052010;
+  --red-text: #f87171;
+  --yellow: #ffe400;
+  --radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+body { background: var(--bg); color: var(--text); width: 300px; min-height: 100px; }
+
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-left { display: flex; align-items: center; gap: 8px; }
+.logo { background: var(--yellow); color: #111; font-size: 12px; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
+.header h1 { font-size: 13px; font-weight: 600; }
+.btn-settings {
+  background: none; border: none; color: var(--text3);
+  font-size: 16px; cursor: pointer; padding: 2px 4px;
+  border-radius: 4px; transition: color .1s;
+}
+.btn-settings:hover { color: var(--text2); }
+
+.body { padding: 14px; }
+
+/* STATES */
+.state { text-align: center; padding: 8px 0 4px; }
+.state .icon { font-size: 32px; margin-bottom: 8px; }
+.state h2 { font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+.state p { font-size: 11px; color: var(--text2); line-height: 1.5; }
+
+/* PRODUCT PREVIEW */
+.product-preview {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px;
+  margin-bottom: 10px;
+  display: none;
+}
+.product-preview .pname { font-size: 12px; font-weight: 500; margin-bottom: 3px; line-height: 1.4; }
+.product-preview .pprice { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 3px; }
+.product-preview .prating { font-size: 11px; color: var(--text2); }
+
+/* BUTTONS */
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 7px; width: 100%; padding: 10px 14px;
+  border-radius: var(--radius); border: none;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  font-family: inherit; transition: background .1s; margin-top: 8px;
+}
+.btn:first-child { margin-top: 0; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn-secondary {
+  background: var(--bg3); color: var(--text2);
+  border: 1px solid var(--border2);
+}
+.btn-secondary:hover { color: var(--text); border-color: #555; }
+
+.spin {
+  display: inline-block; width: 13px; height: 13px;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.status { font-size: 11px; margin-top: 8px; min-height: 14px; color: var(--text2); }
+.status.ok { color: var(--green-text); }
+.status.err { color: var(--red-text); }
+
+/* COUNT BADGE */
+.count-badge {
+  background: var(--bg3); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 8px 12px;
+  font-size: 11px; color: var(--text2);
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.count-badge strong { color: var(--accent); }
+
+/* SETTINGS PANEL */
+.settings-panel { padding: 14px; display: none; }
+.settings-panel.visible { display: block; }
+.back-btn {
+  background: none; border: none; color: var(--text2);
+  font-size: 11px; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 4px;
+  margin-bottom: 12px; padding: 0;
+}
+.back-btn:hover { color: var(--text); }
+.frow { margin-bottom: 10px; }
+.frow label { display: block; font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.frow input {
+  width: 100%; padding: 7px 9px;
+  border: 1px solid var(--border2); border-radius: var(--radius);
+  font-size: 12px; background: var(--bg3);
+  color: var(--text); font-family: inherit;
+}
+.frow input:focus { outline: none; border-color: var(--accent); }
+.frow .hint { font-size: 10px; color: var(--text3); margin-top: 4px; line-height: 1.4; }
+.settings-status { font-size: 11px; margin-top: 8px; color: var(--green-text); min-height: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">ML</div>
+    <h1>Veredicto</h1>
+  </div>
+  <button class="btn-settings" id="btn-settings" title="Configuración">⚙</button>
+</div>
+
+<!-- MAIN -->
+<div id="main-wrapper">
+  <div class="body">
+    <!-- Loading -->
+    <div class="state" id="state-loading">
+      <div class="icon">⏳</div>
+      <h2>Cargando...</h2>
+    </div>
+
+    <!-- Not on ML product page -->
+    <div class="state" id="state-no-product" style="display:none">
+      <div class="icon">🔍</div>
+      <h2>No estás en un producto</h2>
+      <p>Navegá a la página de un producto en<br><strong>mercadolibre.com.ar</strong> y volvé a abrir esta extensión.</p>
+      <button class="btn btn-secondary" id="btn-open-comparador" style="margin-top:12px">Ver comparador →</button>
+    </div>
+
+    <!-- Ready to import -->
+    <div id="state-ready" style="display:none">
+      <div class="product-preview" id="product-preview">
+        <div class="pname" id="prev-name"></div>
+        <div class="pprice" id="prev-price"></div>
+        <div class="prating" id="prev-rating"></div>
+      </div>
+      <div class="count-badge" id="count-badge" style="display:none">
+        Ya tenés <strong id="current-count">0</strong> producto(s) en el comparador
+      </div>
+      <button class="btn btn-primary" id="btn-add">📦 Agregar al comparador</button>
+      <button class="btn btn-secondary" id="btn-open-comparador2">Ver comparador →</button>
+      <div class="status" id="status-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="settings-panel" id="settings-panel">
+  <button class="back-btn" id="btn-back">← Volver</button>
+  <div class="frow">
+    <label>URL del comparador</label>
+    <input type="text" id="cfg-url" placeholder="https://tuusuario.github.io/ml-comparador">
+    <div class="hint">La URL de tu sitio de comparación en GitHub Pages.</div>
+  </div>
+  <button class="btn btn-primary" id="btn-save-settings">Guardar</button>
+  <div class="settings-status" id="settings-status"></div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

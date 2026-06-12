@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Generar íconos</title>
+<style>
+body { font-family: sans-serif; padding: 30px; background: #111; color: #eee; }
+canvas { margin: 8px; border-radius: 12px; }
+.canvases { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 24px; }
+button { background: #FFE400; color: #111; border: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h2 style="margin-bottom:16px">Generador de íconos — ML Comparador</h2>
+<div class="canvases">
+  <div><div style="font-size:11px;color:#888;margin-bottom:4px">128px</div><canvas id="c128" width="128" height="128"></canvas></div>
+  <div><div style="font-size:11px;color:#888;margin-bottom:4px">48px</div><canvas id="c48" width="48" height="48"></canvas></div>
+  <div><div style="font-size:11px;color:#888;margin-bottom:4px">16px</div><canvas id="c16" width="16" height="16"></canvas></div>
+</div>
+<button onclick="downloadAll()">Descargar los 3 íconos</button>
+
+<script>
+function drawIcon(canvas, size) {
+  const ctx = canvas.getContext('2d');
+  const r = size * 0.18;
+
+  // Background
+  ctx.fillStyle = '#FFE400';
+  roundRect(ctx, 0, 0, size, size, r);
+  ctx.fill();
+
+  // Two comparison columns
+  const colW  = size * 0.18;
+  const colH  = size * 0.48;
+  const colR  = size * 0.045;
+  const gap   = size * 0.10;
+  const totalW = colW * 2 + gap;
+  const x1    = (size - totalW) / 2;
+  const x2    = x1 + colW + gap;
+  const yTop  = size * 0.24;
+
+  ctx.fillStyle = '#1a1a1a';
+
+  // Left column (taller — represents best/winner)
+  const leftH = colH;
+  roundRect(ctx, x1, yTop, colW, leftH, colR);
+  ctx.fill();
+
+  // Right column (shorter)
+  const rightH = colH * 0.68;
+  roundRect(ctx, x2, yTop + (leftH - rightH), colW, rightH, colR);
+  ctx.fill();
+
+  // Small checkmark dot on top of left column
+  if (size >= 48) {
+    ctx.beginPath();
+    ctx.arc(x1 + colW / 2, yTop - size * 0.08, size * 0.055, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fill();
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadAll() {
+  ['128', '48', '16'].forEach(s => {
+    const canvas = document.getElementById('c' + s);
+    const a = document.createElement('a');
+    a.download = `icon${s}.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+}
+
+drawIcon(document.getElementById('c128'), 128);
+drawIcon(document.getElementById('c48'), 48);
+drawIcon(document.getElementById('c16'), 16);
+</script>
+</body>
+</html>

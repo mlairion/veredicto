@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Veredicto",
+  "version": "1.0",
+  "description": "Compará productos de MercadoLibre: specs técnicas, precio y reviews en una tabla.",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "https://*.mercadolibre.com.ar/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.mercadolibre.com.ar/MLA*",
+        "https://*.mercadolibre.com.ar/p/MLA*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
