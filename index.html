@@ -296,11 +296,6 @@ tr.row-key .col-spec{color:var(--text);font-weight:500}
   white-space:pre-wrap;word-break:break-all;margin:8px 0;
 }
 .section-hd{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:20px}
-.glossary-table{width:100%;border-collapse:collapse}
-.glossary-table tr{border-bottom:1px solid var(--border)}
-.glossary-table td{padding:10px 6px;font-size:13px;vertical-align:top}
-.glossary-table td:first-child{color:var(--text);font-weight:500;width:160px;white-space:nowrap}
-.glossary-table td:last-child{color:var(--text2);line-height:1.5}
 .settings-block{
   background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
   padding:16px;margin-bottom:16px;
@@ -374,7 +369,6 @@ tr.row-key .col-spec{color:var(--text);font-weight:500}
 
   <div class="sb-nav">
     <button class="nav-item" onclick="setView('instrucciones')">📖 Instrucciones</button>
-    <button class="nav-item" onclick="setView('glosario')">📚 Glosario</button>
   </div>
 
   <div class="sb-footer">
@@ -1014,10 +1008,6 @@ function renderContent() {
     const sw = document.getElementById('specs-panel-wrap');
     if (sw) { sw.style.display = 'none'; document.getElementById('specs-panel')?.classList.remove('open'); }
     content.innerHTML = renderInstrucciones();
-  } else if (currentView === 'glosario') {
-    title.textContent = 'Glosario';
-    right.innerHTML = '';
-    content.innerHTML = renderGlosario();
   } else if (currentView === 'ajustes') {
     title.textContent = 'Ajustes';
     right.innerHTML = '';
@@ -1247,37 +1237,6 @@ function renderInstrucciones() {
   </div>`;
 }
 
-function renderGlosario() {
-  const terms = [
-    ['MLA', 'Código único de cada publicación en MercadoLibre Argentina (ej: MLA1234567890).'],
-    ['Condición', '"Nuevo" o "Usado". Siempre verificar antes de comprar.'],
-    ['Vendedor oficial', 'Cuenta verificada directamente por la marca. Mayor garantía.'],
-    ['Full (MercadoLibre)', 'Producto almacenado en depósitos de ML. Envío más rápido y confiable.'],
-    ['MercadoPago', 'Sistema de pago de ML. Permite cuotas sin interés y protege la compra.'],
-    ['Garantía oficial', 'Garantía brindada por el fabricante a través de sus canales oficiales.'],
-    ['Garantía de fábrica', 'Garantía directa del fabricante, sin intermediarios.'],
-    ['Reputación del vendedor', 'Indicador (verde/amarillo/rojo) basado en ventas, calificaciones y reclamos.'],
-    ['Opiniones', 'Calificaciones de compradores anteriores. Más de 10 opiniones = más confiable.'],
-    ['Rating', 'Promedio de calificación (1 a 5 estrellas) sobre las opiniones del producto.'],
-    ['Potencia (W)', 'Watts. A más potencia, más rápido calienta/funciona el aparato.'],
-    ['Capacidad (L)', 'Litros. Volumen que puede contener el producto.'],
-    ['Voltaje (V)', 'En Argentina, el estándar es 220V. Verificar antes de comprar un producto importado.'],
-    ['RPM', 'Revoluciones por minuto. Se usa en motores, licuadoras, impresoras, etc.'],
-    ['BTU', 'Unidad de potencia térmica. Se usa en aires acondicionados (más BTU = más frío/calor).'],
-    ['EER / SEER', 'Eficiencia energética de equipos de climatización. Más alto = más eficiente.'],
-    ['Inverter', 'Tecnología de compresores de velocidad variable. Más eficiente y silencioso.'],
-    ['HEPA', 'Filtro de aire de alta eficiencia. Filtra partículas de hasta 0.3 micrones.'],
-    ['NFC', 'Near Field Communication. Permite pagos sin contacto y conexión rápida Bluetooth.'],
-    ['IP44 / IP67', 'Grado de protección contra polvo y agua. IP67 = sumergible hasta 1m por 30 min.'],
-  ];
-  return `<div class="page-content">
-    <h2>Glosario</h2>
-    <p class="subtitle">Términos comunes que aparecen en las fichas técnicas y publicaciones de MercadoLibre.</p>
-    <table class="glossary-table">
-      ${terms.map(([t,d]) => `<tr><td>${esc(t)}</td><td>${esc(d)}</td></tr>`).join('')}
-    </table>
-  </div>`;
-}
 
 function renderAjustes() {
   const sbUrl = localStorage.getItem(LS_SB_URL) || '';
