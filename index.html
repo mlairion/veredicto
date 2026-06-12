@@ -148,41 +148,52 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── COMPARISON TABLE ────────────────────────────────────────────── */
-.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0}
-.cmp-table{border-collapse:separate;border-spacing:0 0;width:100%;table-layout:fixed}
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmp-table{border-collapse:collapse;table-layout:fixed;width:100%}
 .col-spec{
-  position:sticky;left:0;background:var(--bg2);border-right:1px solid var(--border2);z-index:10;
-  width:150px;min-width:150px;max-width:150px;padding:9px 13px;font-size:12px;color:var(--text2);text-align:left;
+  position:sticky;left:0;z-index:10;background:var(--bg);
+  width:160px;padding:10px 14px;font-size:12px;color:var(--text2);
+  text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.col-spec.hd{background:var(--bg);border-bottom:1px solid var(--border2);vertical-align:bottom;padding-bottom:10px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.col-spec.hd{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;vertical-align:bottom;padding-bottom:8px;border-bottom:2px solid var(--border2)}
 .col-product{
-  width:210px;min-width:210px;max-width:210px;padding:12px;vertical-align:top;
-  border-left:1px solid var(--border2);border-top:1px solid var(--border2);
+  width:200px;padding:14px 12px;vertical-align:top;
+  border-left:1px solid var(--border);border-bottom:1px solid var(--border);
   background:var(--bg2);
 }
-.col-product:first-of-type{border-left:none}
-.product-header{display:flex;flex-direction:column;gap:6px}
-.product-img{width:80px;height:80px;object-fit:contain;border-radius:8px;background:#fff;padding:4px;align-self:center}
-.product-img-ph{width:80px;height:80px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;align-self:center}
-.product-name{font-size:12px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.product-price{font-size:15px;font-weight:700}
+.product-header{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center}
+.product-img{width:88px;height:88px;object-fit:contain;border-radius:8px;background:#fff;padding:4px}
+.product-img-ph{width:88px;height:88px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.product-name{font-size:12px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;width:100%}
+.product-price{font-size:16px;font-weight:700}
 .product-price.best{color:var(--best)}
 .product-price.worst{color:var(--red)}
-.product-rating{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px}
+.product-rating{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px;justify-content:center}
 .star{color:var(--yellow)}
-.product-actions{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
-.btn-link{font-size:11px;color:var(--accent);text-decoration:none;padding:3px 7px;border:1px solid var(--accent);border-radius:4px;transition:all .1s}
+.product-actions{display:flex;gap:5px;margin-top:2px;flex-wrap:wrap;justify-content:center}
+.btn-link{font-size:11px;color:var(--accent);text-decoration:none;padding:3px 8px;border:1px solid var(--accent);border-radius:4px;transition:all .1s}
 .btn-link:hover{background:var(--accent);color:#fff}
-.btn-remove{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:4px;padding:3px 7px;cursor:pointer;font-family:inherit;transition:all .1s}
+.btn-remove{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:4px;padding:3px 8px;cursor:pointer;font-family:inherit;transition:all .1s}
 .btn-remove:hover{color:var(--red);border-color:var(--red)}
-.cmp-table tbody tr{border-bottom:1px solid var(--border)}
-.col-value{padding:9px 13px;font-size:12px;color:var(--text);border-left:1px solid var(--border2);vertical-align:middle}
-.col-value:first-of-type{border-left:none}
+.cmp-table tbody tr:hover{background:rgba(255,255,255,.02)}
+.col-value{padding:10px 14px;font-size:12px;color:var(--text);border-left:1px solid var(--border);border-bottom:1px solid var(--border);vertical-align:middle;word-break:break-word}
 .col-value.best-val{background:var(--best-bg);color:var(--best);font-weight:600}
 .col-value.muted{color:var(--text3)}
-.col-value.empty{color:var(--text3);font-style:italic}
-tr.row-sep{height:0}
-tr.row-sep td{padding:0;border:none;background:var(--bg);font-size:10px;color:var(--text3);padding:8px 13px 3px;text-transform:uppercase;letter-spacing:.6px}
+tr.row-sep td{padding:6px 14px 4px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;background:var(--bg);border-bottom:1px solid var(--border)}
+/* ── SPECS PANEL ─────────────────────────────────────────────────── */
+.specs-panel-wrap{position:relative;display:inline-block}
+.specs-panel{
+  position:absolute;top:calc(100% + 6px);right:0;z-index:200;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:8px 0;min-width:200px;max-height:320px;overflow-y:auto;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);display:none;
+}
+.specs-panel.open{display:block}
+.specs-panel-hd{padding:6px 12px 8px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.specs-panel-hd button{font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit}
+.spec-toggle-item{display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;font-size:12px;color:var(--text2);transition:background .1s}
+.spec-toggle-item:hover{background:var(--bg3);color:var(--text)}
+.spec-toggle-item input{accent-color:var(--accent);cursor:pointer}
 tr.row-key .col-spec{color:var(--text);font-weight:500}
 
 /* ── EMPTY STATES ────────────────────────────────────────────────── */
@@ -937,12 +948,9 @@ function renderContent() {
         <input class="filter-input" id="price-max" type="number" placeholder="máx" value="${filterMax||''}">
         <button class="btn btn-primary btn-sm" onclick="applyFilter()">Filtrar</button>
       </div>
-      <div class="filter-group">
-        <label>Specs</label>
-        <input class="filter-input" id="spec-filter" type="search" placeholder="buscar..." value="${esc(specFilter)}" autocomplete="off" style="width:90px">
-        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
-          <input type="checkbox" ${hideIdentical?'checked':''} onchange="hideIdentical=this.checked;renderContent()"> Ocultar iguales
-        </label>
+      <div class="specs-panel-wrap" id="specs-panel-wrap">
+        <button class="btn btn-secondary btn-sm" onclick="toggleSpecsPanel(event)">Specs ▾</button>
+        <div class="specs-panel" id="specs-panel"></div>
       </div>
       ${all.length ? `<span class="prod-count"><b>${prods.length}</b>/${all.length}</span>` : ''}
       ${currentProjectId ? `<button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">+ Agregar</button>` : ''}
@@ -964,6 +972,8 @@ function renderContent() {
       content.innerHTML = renderEmpty('🔍', 'Ningún producto en ese rango de precio', 'Ajustá el filtro para ver más resultados.');
     } else {
       content.innerHTML = `<div class="cmp-wrap">${renderTable(prods)}</div>`;
+      // stop clicks inside table from closing specs panel
+      content.querySelector('.cmp-wrap')?.addEventListener('click', e => e.stopPropagation());
     }
 
     // Bind filter enter keys
@@ -1020,8 +1030,70 @@ function toggleProductVisibility(id) {
 function toggleSpec(key) {
   if (hiddenSpecs.has(key)) hiddenSpecs.delete(key);
   else hiddenSpecs.add(key);
-  renderContent();
+  renderTable_update();
+  renderSpecsPanel();
 }
+
+function renderTable_update() {
+  const el = document.getElementById('content');
+  if (!el) return;
+  const prods = getVisibleProducts();
+  if (prods.length) {
+    const wrap = el.querySelector('.cmp-wrap');
+    if (wrap) wrap.innerHTML = renderTable(prods);
+  }
+}
+
+function toggleSpecsPanel(e) {
+  e.stopPropagation();
+  const panel = document.getElementById('specs-panel');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('open');
+  if (!isOpen) renderSpecsPanel();
+  panel.classList.toggle('open');
+}
+
+function renderSpecsPanel() {
+  const panel = document.getElementById('specs-panel');
+  if (!panel) return;
+  const prods = getVisibleProducts();
+  const specKeys = [];
+  const seen = new Set();
+  prods.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
+  if (!specKeys.length) { panel.innerHTML = `<div style="padding:10px 12px;font-size:12px;color:var(--text3)">Sin especificaciones</div>`; return; }
+
+  const allVisible = specKeys.every(k => !hiddenSpecs.has(k));
+  panel.innerHTML = `
+    <div class="specs-panel-hd">
+      <span>Especificaciones</span>
+      <button onclick="toggleAllSpecs(${allVisible})">${allVisible ? 'Ocultar todas' : 'Mostrar todas'}</button>
+    </div>
+    <label class="spec-toggle-item" style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:4px">
+      <input type="checkbox" ${hideIdentical?'checked':''} onchange="hideIdentical=this.checked;renderTable_update();renderSpecsPanel()"> Ocultar filas iguales
+    </label>
+    ${specKeys.map(k => `
+      <label class="spec-toggle-item">
+        <input type="checkbox" ${hiddenSpecs.has(k)?'':'checked'} onchange="toggleSpec(${JSON.stringify(k)})">
+        ${esc(k)}
+      </label>`).join('')}`;
+}
+
+function toggleAllSpecs(hide) {
+  const prods = getVisibleProducts();
+  const specKeys = [];
+  const seen = new Set();
+  prods.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
+  if (hide) specKeys.forEach(k => hiddenSpecs.add(k));
+  else hiddenSpecs.clear();
+  renderTable_update();
+  renderSpecsPanel();
+}
+
+// Close specs panel on outside click
+document.addEventListener('click', () => {
+  const p = document.getElementById('specs-panel');
+  if (p) p.classList.remove('open');
+});
 
 function toggleTheme() {
   darkMode = !darkMode;
@@ -1111,13 +1183,8 @@ function renderTable(prods) {
       const hidden = hiddenSpecs.has(key);
       const allSame = !hidden && vals.every(v => v === vals[0]) && vals[0] != null;
       const keyEsc = esc(key).replace(/'/g, "\\'");
-      h += `<tr style="${hidden?'opacity:.4':''}">
-        <td class="col-spec">
-          <div style="display:flex;align-items:center;gap:6px">
-            <input type="checkbox" ${hidden?'':'checked'} onchange="toggleSpec('${keyEsc}')" style="accent-color:var(--accent);flex-shrink:0;cursor:pointer">
-            ${esc(key)}
-          </div>
-        </td>`;
+      h += `<tr>
+        <td class="col-spec">${esc(key)}</td>`;
       vals.forEach(v => {
         h += `<td class="col-value ${allSame?'muted':''}">${!hidden && v ? esc(v) : '<span class="empty">—</span>'}</td>`;
       });
