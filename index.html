@@ -149,18 +149,28 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 
 /* ── COMPARISON TABLE ────────────────────────────────────────────── */
 .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cmp-table{border-collapse:collapse;table-layout:fixed;width:100%}
+.cmp-table{border-collapse:separate;border-spacing:0;table-layout:fixed;width:100%}
 .col-spec{
-  position:sticky;left:0;z-index:10;background:var(--bg);
-  width:160px;padding:10px 14px;font-size:12px;color:var(--text2);
-  text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  position:sticky;left:0;z-index:10;
+  background:var(--bg2);
+  width:160px;min-width:160px;
+  padding:10px 14px;font-size:12px;color:var(--text2);
+  text-align:left;vertical-align:middle;
+  border-right:2px solid var(--border2);
+  border-bottom:1px solid var(--border);
 }
-.col-spec.hd{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;vertical-align:bottom;padding-bottom:8px;border-bottom:2px solid var(--border2)}
+.col-spec.hd{
+  font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;
+  vertical-align:bottom;padding-bottom:8px;border-bottom:2px solid var(--border2);
+  background:var(--bg);
+}
 .col-product{
-  width:200px;padding:14px 12px;vertical-align:top;
-  border-left:1px solid var(--border);border-bottom:1px solid var(--border);
+  width:200px;min-width:200px;
+  padding:14px 12px;vertical-align:top;
+  border-left:1px solid var(--border);border-bottom:2px solid var(--border2);
   background:var(--bg2);
 }
+.col-product:last-child{border-right:1px solid var(--border)}
 .product-header{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center}
 .product-img{width:88px;height:88px;object-fit:contain;border-radius:8px;background:#fff;padding:4px}
 .product-img-ph{width:88px;height:88px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px}
@@ -170,16 +180,25 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 .product-price.worst{color:var(--red)}
 .product-rating{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px;justify-content:center}
 .star{color:var(--yellow)}
-.product-actions{display:flex;gap:5px;margin-top:2px;flex-wrap:wrap;justify-content:center}
+.product-actions{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;justify-content:center}
 .btn-link{font-size:11px;color:var(--accent);text-decoration:none;padding:3px 8px;border:1px solid var(--accent);border-radius:4px;transition:all .1s}
 .btn-link:hover{background:var(--accent);color:#fff}
 .btn-remove{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:4px;padding:3px 8px;cursor:pointer;font-family:inherit;transition:all .1s}
 .btn-remove:hover{color:var(--red);border-color:var(--red)}
-.cmp-table tbody tr:hover{background:rgba(255,255,255,.02)}
-.col-value{padding:10px 14px;font-size:12px;color:var(--text);border-left:1px solid var(--border);border-bottom:1px solid var(--border);vertical-align:middle;word-break:break-word}
+.col-value{
+  padding:10px 14px;font-size:12px;color:var(--text);
+  border-left:1px solid var(--border);border-bottom:1px solid var(--border);
+  vertical-align:middle;word-break:break-word;
+  height:40px;
+}
+.col-value:last-child{border-right:1px solid var(--border)}
 .col-value.best-val{background:var(--best-bg);color:var(--best);font-weight:600}
 .col-value.muted{color:var(--text3)}
-tr.row-sep td{padding:6px 14px 4px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;background:var(--bg);border-bottom:1px solid var(--border)}
+tr.row-sep .col-spec,tr.row-sep td{
+  padding:5px 14px;font-size:10px;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.6px;background:var(--bg);border-bottom:1px solid var(--border2);
+  font-weight:600;
+}
 /* ── SPECS PANEL ─────────────────────────────────────────────────── */
 .specs-panel-wrap{position:relative;display:inline-block}
 .specs-panel{
@@ -616,17 +635,28 @@ async function fetchMLProduct(url) {
     const photos = (item.pictures || [])
       .map(p => p.url || p.secure_url || '').filter(s => s.startsWith('http')).slice(0, 6);
     let price = item.buy_box_winner?.price || item.buy_box_winner?.listing_price || item.price || null;
-    // fallback: fetch first child item for price
     if (!price) {
       try {
-        const ir = await fetch(`${ML_PROXY}/products/${id}/items?limit=1`);
+        // try catalog items list
+        const ir = await fetch(`${ML_PROXY}/products/${id}/items?limit=5`);
         if (ir.ok) {
           const idata = await ir.json();
-          const firstId = (idata.results || [])[0];
-          if (firstId) {
-            const pr = await fetch(`${ML_PROXY}/items/${firstId}`);
-            if (pr.ok) { const pd = await pr.json(); price = pd.price || null; }
+          const ids = (idata.results || []).slice(0, 3);
+          for (const cid of ids) {
+            const pr = await fetch(`${ML_PROXY}/items/${cid}`);
+            if (pr.ok) { const pd = await pr.json(); if (pd.price) { price = pd.price; break; } }
           }
+        }
+      } catch {}
+    }
+    if (!price) {
+      try {
+        // try search by catalog_product_id
+        const sr = await fetch(`${ML_PROXY}/sites/MLA/search?catalog_product_id=${id}&limit=3&sort=price_asc`);
+        if (sr.ok) {
+          const sd = await sr.json();
+          const first = (sd.results || [])[0];
+          if (first?.price) price = first.price;
         }
       } catch {}
     }
@@ -949,8 +979,8 @@ function renderContent() {
         <button class="btn btn-primary btn-sm" onclick="applyFilter()">Filtrar</button>
       </div>
       <div class="specs-panel-wrap" id="specs-panel-wrap">
-        <button class="btn btn-secondary btn-sm" onclick="toggleSpecsPanel(event)">Specs ▾</button>
-        <div class="specs-panel" id="specs-panel"></div>
+        <button class="btn btn-secondary btn-sm" onclick="toggleSpecsPanel(event)" title="Filtrar especificaciones">⚙ Specs</button>
+        <div class="specs-panel" id="specs-panel" onclick="event.stopPropagation()"></div>
       </div>
       ${all.length ? `<span class="prod-count"><b>${prods.length}</b>/${all.length}</span>` : ''}
       ${currentProjectId ? `<button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">+ Agregar</button>` : ''}
