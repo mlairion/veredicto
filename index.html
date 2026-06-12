@@ -73,17 +73,21 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 .btn-new-proj:hover{color:var(--accent)}
 
 .proj-item{
-  padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  padding:7px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;
   transition:background .1s;border-radius:0;
 }
 .proj-item:hover{background:var(--bg3)}
 .proj-item.active{background:rgba(52,131,250,.1);border-right:2px solid var(--accent)}
 .proj-name{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.proj-count{
-  font-size:10px;background:var(--bg4);color:var(--text2);
-  padding:1px 6px;border-radius:10px;flex-shrink:0;
-}
+.proj-count{font-size:10px;background:var(--bg4);color:var(--text2);padding:1px 6px;border-radius:10px;flex-shrink:0}
 .proj-item.active .proj-name{color:var(--accent)}
+.proj-chevron{font-size:10px;color:var(--text3);transition:transform .15s;flex-shrink:0}
+.proj-chevron.open{transform:rotate(90deg)}
+.proj-products{padding:0 14px 6px 28px;display:none}
+.proj-products.open{display:block}
+.proj-prod-item{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:var(--text2);cursor:pointer}
+.proj-prod-item:hover{color:var(--text)}
+.proj-prod-item input[type=checkbox]{accent-color:var(--accent);flex-shrink:0}
 
 .sb-nav{padding:6px 0;flex-shrink:0}
 .nav-item{
@@ -144,32 +148,36 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── COMPARISON TABLE ────────────────────────────────────────────── */
-.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cmp-table{border-collapse:collapse;width:100%;table-layout:fixed}
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px 0}
+.cmp-table{border-collapse:separate;border-spacing:0 0;width:100%;table-layout:fixed}
 .col-spec{
   position:sticky;left:0;background:var(--bg2);border-right:1px solid var(--border2);z-index:10;
-  width:160px;min-width:160px;max-width:160px;padding:9px 13px;font-size:12px;color:var(--text2);text-align:left;
+  width:150px;min-width:150px;max-width:150px;padding:9px 13px;font-size:12px;color:var(--text2);text-align:left;
 }
 .col-spec.hd{background:var(--bg);border-bottom:1px solid var(--border2);vertical-align:bottom;padding-bottom:10px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-.col-product{width:220px;min-width:220px;max-width:220px;padding:11px 13px;border-right:1px solid var(--border);vertical-align:top}
-.col-product:last-child{border-right:none}
-.product-header{display:flex;flex-direction:column;gap:5px}
-.product-img{width:76px;height:76px;object-fit:contain;border-radius:6px;background:#fff;padding:3px;align-self:center}
-.product-img-ph{width:76px;height:76px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:26px;align-self:center}
+.col-product{
+  width:210px;min-width:210px;max-width:210px;padding:12px;vertical-align:top;
+  border-left:1px solid var(--border2);border-top:1px solid var(--border2);
+  background:var(--bg2);
+}
+.col-product:first-of-type{border-left:none}
+.product-header{display:flex;flex-direction:column;gap:6px}
+.product-img{width:80px;height:80px;object-fit:contain;border-radius:8px;background:#fff;padding:4px;align-self:center}
+.product-img-ph{width:80px;height:80px;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;align-self:center}
 .product-name{font-size:12px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.product-price{font-size:16px;font-weight:700}
+.product-price{font-size:15px;font-weight:700}
 .product-price.best{color:var(--best)}
 .product-price.worst{color:var(--red)}
 .product-rating{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px}
 .star{color:var(--yellow)}
-.product-actions{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+.product-actions{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
 .btn-link{font-size:11px;color:var(--accent);text-decoration:none;padding:3px 7px;border:1px solid var(--accent);border-radius:4px;transition:all .1s}
 .btn-link:hover{background:var(--accent);color:#fff}
 .btn-remove{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:4px;padding:3px 7px;cursor:pointer;font-family:inherit;transition:all .1s}
 .btn-remove:hover{color:var(--red);border-color:var(--red)}
 .cmp-table tbody tr{border-bottom:1px solid var(--border)}
-.col-value{padding:8px 13px;font-size:12px;color:var(--text);border-right:1px solid var(--border);vertical-align:middle}
-.col-value:last-child{border-right:none}
+.col-value{padding:9px 13px;font-size:12px;color:var(--text);border-left:1px solid var(--border2);vertical-align:middle}
+.col-value:first-of-type{border-left:none}
 .col-value.best-val{background:var(--best-bg);color:var(--best);font-weight:600}
 .col-value.muted{color:var(--text3)}
 .col-value.empty{color:var(--text3);font-style:italic}
@@ -869,13 +877,33 @@ function renderProjectList() {
     return;
   }
   el.innerHTML = projects.map(p => {
-    const count = (products[p.id] || []).length;
+    const prods = products[p.id] || [];
+    const count = prods.length;
     const active = p.id === currentProjectId && currentView === 'compare';
-    return `<div class="proj-item ${active ? 'active' : ''}" onclick="selectProject('${p.id}')">
-      <span class="proj-name">${esc(p.name)}</span>
-      <span class="proj-count">${count}</span>
+    const isOpen = active && count > 0;
+    const prodList = prods.map(prod => {
+      const visible = !hiddenProductIds.has(prod.id);
+      const name = (prod.title || 'Sin nombre').slice(0, 28) + ((prod.title||'').length > 28 ? '…' : '');
+      return `<label class="proj-prod-item">
+        <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleProductVisibility('${prod.id}')">
+        ${esc(name)}
+      </label>`;
+    }).join('');
+    return `<div>
+      <div class="proj-item ${active ? 'active' : ''}" onclick="selectProject('${p.id}')">
+        <span class="proj-name">${esc(p.name)}</span>
+        <span class="proj-count">${count}</span>
+        ${count > 0 ? `<span class="proj-chevron ${isOpen?'open':''}" onclick="event.stopPropagation();toggleProjExpand(this)">▶</span>` : ''}
+      </div>
+      ${count > 0 ? `<div class="proj-products ${isOpen?'open':''}">${prodList}</div>` : ''}
     </div>`;
   }).join('');
+}
+
+function toggleProjExpand(chevron) {
+  chevron.classList.toggle('open');
+  const products_el = chevron.closest('.proj-item').nextElementSibling;
+  if (products_el) products_el.classList.toggle('open');
 }
 
 function setView(view) {
@@ -1001,17 +1029,18 @@ function applyTheme() {
 }
 
 function renderTable(prods) {
-  // Apply product visibility filter
+  // Only show visible products
   const visProds = prods.filter(p => !hiddenProductIds.has(p.id));
+  if (!visProds.length) return `<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px">Todos los productos están ocultos. Activalos desde el panel lateral.</div>`;
 
   const specKeys = [];
   const seen = new Set();
-  prods.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
+  visProds.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
   const filteredSpecKeys = specKeys.filter(k => {
     if (specFilter && !k.toLowerCase().includes(specFilter.toLowerCase())) return false;
     if (hideIdentical) {
       const vals = visProds.map(p => (p.specs||{})[k] || null);
-      if (vals.every(v => v === vals[0] && v != null)) return false;
+      if (vals.length > 1 && vals.every(v => v === vals[0] && v != null)) return false;
     }
     return true;
   });
@@ -1022,28 +1051,24 @@ function renderTable(prods) {
   const ratings  = visProds.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
   const maxRating = ratings.length ? Math.max(...ratings) : null;
 
-  // Header row: all products with eye toggle
   let h = `<table class="cmp-table"><thead><tr>`;
   h += `<th class="col-spec hd">Característica</th>`;
-  prods.forEach(p => {
-    const hidden = hiddenProductIds.has(p.id);
-    const isMin = !hidden && p.price != null && p.price === minPrice && prices.length > 1;
-    const isMax = !hidden && p.price != null && p.price === maxPrice && prices.length > 1;
+  visProds.forEach(p => {
+    const isMin = p.price != null && p.price === minPrice && prices.length > 1;
+    const isMax = p.price != null && p.price === maxPrice && prices.length > 1;
     const rVal  = parseFloat(p.rating);
-    const isBestR = !hidden && !isNaN(rVal) && rVal === maxRating && ratings.length > 1;
+    const isBestR = !isNaN(rVal) && rVal === maxRating && ratings.length > 1;
     const img = (p.photos && p.photos[0])
-      ? `<img class="product-img" src="${esc(p.photos[0])}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-         <div class="product-img-ph" style="display:none">📦</div>`
+      ? `<img class="product-img" src="${esc(p.photos[0])}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="product-img-ph" style="display:none">📦</div>`
       : `<div class="product-img-ph">📦</div>`;
-    h += `<th class="col-product" style="${hidden?'opacity:.35':''}">
+    h += `<th class="col-product">
       <div class="product-header">
         ${img}
         <div class="product-name">${esc(p.title||'Sin nombre')}</div>
-        ${!hidden ? `<div class="product-price ${isMin?'best':isMax?'worst':''}">${p.price != null ? formatPrice(p.price) : '—'}${isMin?` <span style="font-size:10px;font-weight:400">✓ mejor</span>`:''}</div>` : ''}
-        ${!hidden && p.rating ? `<div class="product-rating"><span class="star">★</span><span style="color:var(--text);font-weight:600">${esc(p.rating)}</span>${p.reviews?` (${esc(p.reviews)})`:''}${isBestR?' <span style="color:var(--best);font-size:10px">✓</span>':''}</div>` : ''}
+        <div class="product-price ${isMin?'best':isMax?'worst':''}">${p.price != null ? formatPrice(p.price) : '—'}${isMin?` <span style="font-size:10px;font-weight:400">✓ mejor</span>`:''}</div>
+        ${p.rating ? `<div class="product-rating"><span class="star">★</span><b>${esc(p.rating)}</b>${p.reviews?` (${esc(p.reviews)})`:''}${isBestR?' <span style="color:var(--best);font-size:10px">✓</span>':''}</div>` : ''}
         <div class="product-actions">
-          ${p.link && !hidden ? `<a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>` : ''}
-          <button class="btn-remove" onclick="toggleProductVisibility('${esc(p.id)}')">${hidden?'👁 Mostrar':'👁 Ocultar'}</button>
+          ${p.link ? `<a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>` : ''}
           <button class="btn-remove" onclick="removeProductFromProject('${esc(p.id)}')">Quitar</button>
         </div>
       </div>
@@ -1053,39 +1078,33 @@ function renderTable(prods) {
 
   // Price row
   h += `<tr class="row-key"><td class="col-spec">Precio</td>`;
-  prods.forEach(p => {
-    const hidden = hiddenProductIds.has(p.id);
-    const isBest = !hidden && p.price != null && p.price === minPrice && prices.length > 1;
-    h += `<td class="col-value ${hidden?'muted':isBest?'best-val':''}">${!hidden && p.price != null ? formatPrice(p.price) : '<span class="empty">—</span>'}</td>`;
+  visProds.forEach(p => {
+    const isBest = p.price != null && p.price === minPrice && prices.length > 1;
+    h += `<td class="col-value ${isBest?'best-val':''}">${p.price != null ? formatPrice(p.price) : '<span class="empty">—</span>'}</td>`;
   });
   h += `</tr>`;
 
   // Rating row
-  const allRatings = prods.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
-  if (allRatings.length) {
+  if (ratings.length) {
     h += `<tr class="row-key"><td class="col-spec">Rating</td>`;
-    prods.forEach(p => {
-      const hidden = hiddenProductIds.has(p.id);
+    visProds.forEach(p => {
       const r = parseFloat(p.rating);
-      const isBest = !hidden && !isNaN(r) && r === maxRating && ratings.length > 1;
-      h += `<td class="col-value ${hidden?'muted':isBest?'best-val':''}">${!hidden && p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span class="empty">—</span>'}</td>`;
+      const isBest = !isNaN(r) && r === maxRating && ratings.length > 1;
+      h += `<td class="col-value ${isBest?'best-val':''}">${p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span class="empty">—</span>'}</td>`;
     });
     h += `</tr>`;
   }
 
   // Specs
   if (filteredSpecKeys.length) {
-    h += `<tr class="row-sep"><td colspan="${prods.length+1}">Especificaciones técnicas</td></tr>`;
+    h += `<tr class="row-sep"><td colspan="${visProds.length+1}">Especificaciones técnicas</td></tr>`;
     filteredSpecKeys.forEach(key => {
-      const vals = prods.map(p => (p.specs||{})[key] || null);
+      const vals = visProds.map(p => (p.specs||{})[key] || null);
       if (vals.every(v => v == null)) return;
-      const visVals = visProds.map(p => (p.specs||{})[key] || null);
-      const allSame = visVals.every(v => v === visVals[0]) && visVals[0] != null;
+      const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
       h += `<tr><td class="col-spec">${esc(key)}</td>`;
-      prods.forEach((p, i) => {
-        const hidden = hiddenProductIds.has(p.id);
-        const v = vals[i];
-        h += `<td class="col-value ${hidden?'muted':allSame?'muted':''}">${!hidden && v ? esc(v) : '<span class="empty">—</span>'}</td>`;
+      vals.forEach(v => {
+        h += `<td class="col-value ${allSame?'muted':''}">${v ? esc(v) : '<span class="empty">—</span>'}</td>`;
       });
       h += `</tr>`;
     });
