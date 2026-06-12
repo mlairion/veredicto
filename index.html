@@ -153,11 +153,13 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 .col-spec{
   position:sticky;left:0;z-index:10;
   background:var(--bg2);
-  width:160px;min-width:160px;
-  padding:10px 14px;font-size:12px;color:var(--text2);
+  width:160px;min-width:160px;max-width:160px;
+  padding:0 14px;font-size:12px;color:var(--text2);
   text-align:left;vertical-align:middle;
   border-right:2px solid var(--border2);
   border-bottom:1px solid var(--border);
+  height:40px;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;
 }
 .col-spec.hd{
   font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;
@@ -186,10 +188,11 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 .btn-remove{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:4px;padding:3px 8px;cursor:pointer;font-family:inherit;transition:all .1s}
 .btn-remove:hover{color:var(--red);border-color:var(--red)}
 .col-value{
-  padding:10px 14px;font-size:12px;color:var(--text);
+  padding:0 14px;font-size:12px;color:var(--text);
   border-left:1px solid var(--border);border-bottom:1px solid var(--border);
-  vertical-align:middle;word-break:break-word;
-  height:40px;
+  vertical-align:middle;
+  height:40px;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;max-width:200px;
 }
 .col-value:last-child{border-right:1px solid var(--border)}
 .col-value.best-val{background:var(--best-bg);color:var(--best);font-weight:600}
@@ -389,6 +392,10 @@ tr.row-key .col-spec{color:var(--text);font-weight:500}
       <h1 class="topbar-title" id="topbar-title">Veredicto</h1>
     </div>
     <div class="topbar-right" id="topbar-right"></div>
+    <div class="specs-panel-wrap" id="specs-panel-wrap" style="display:none">
+      <button class="btn btn-secondary btn-sm" onclick="toggleSpecsPanel(event)" title="Filtrar especificaciones">☰ Specs</button>
+      <div class="specs-panel" id="specs-panel" onclick="event.stopPropagation()"></div>
+    </div>
   </div>
   <div id="content"></div>
 </main>
@@ -635,28 +642,15 @@ async function fetchMLProduct(url) {
     const photos = (item.pictures || [])
       .map(p => p.url || p.secure_url || '').filter(s => s.startsWith('http')).slice(0, 6);
     let price = item.buy_box_winner?.price || item.buy_box_winner?.listing_price || item.price || null;
-    if (!price) {
+    if (!price && item.name) {
       try {
-        // try catalog items list
-        const ir = await fetch(`${ML_PROXY}/products/${id}/items?limit=5`);
-        if (ir.ok) {
-          const idata = await ir.json();
-          const ids = (idata.results || []).slice(0, 3);
-          for (const cid of ids) {
-            const pr = await fetch(`${ML_PROXY}/items/${cid}`);
-            if (pr.ok) { const pd = await pr.json(); if (pd.price) { price = pd.price; break; } }
-          }
-        }
-      } catch {}
-    }
-    if (!price) {
-      try {
-        // try search by catalog_product_id
-        const sr = await fetch(`${ML_PROXY}/sites/MLA/search?catalog_product_id=${id}&limit=3&sort=price_asc`);
+        // Search by product name to get a real listing price
+        const sr = await fetch(`${ML_PROXY}/sites/MLA/search?q=${encodeURIComponent(item.name)}&limit=5`);
         if (sr.ok) {
           const sd = await sr.json();
-          const first = (sd.results || [])[0];
-          if (first?.price) price = first.price;
+          const match = (sd.results || []).find(r => r.price && r.catalog_product_id === id)
+                     || (sd.results || []).find(r => r.price);
+          if (match?.price) price = match.price;
         }
       } catch {}
     }
@@ -978,13 +972,13 @@ function renderContent() {
         <input class="filter-input" id="price-max" type="number" placeholder="máx" value="${filterMax||''}">
         <button class="btn btn-primary btn-sm" onclick="applyFilter()">Filtrar</button>
       </div>
-      <div class="specs-panel-wrap" id="specs-panel-wrap">
-        <button class="btn btn-secondary btn-sm" onclick="toggleSpecsPanel(event)" title="Filtrar especificaciones">⚙ Specs</button>
-        <div class="specs-panel" id="specs-panel" onclick="event.stopPropagation()"></div>
-      </div>
       ${all.length ? `<span class="prod-count"><b>${prods.length}</b>/${all.length}</span>` : ''}
       ${currentProjectId ? `<button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">+ Agregar</button>` : ''}
     `;
+
+    // Show specs button only when there are products to filter
+    const specsBtnWrap = document.getElementById('specs-panel-wrap');
+    if (specsBtnWrap) specsBtnWrap.style.display = all.length ? '' : 'none';
 
     if (!projects.length) {
       content.innerHTML = renderEmpty(
@@ -1017,6 +1011,8 @@ function renderContent() {
   } else if (currentView === 'instrucciones') {
     title.textContent = 'Instrucciones';
     right.innerHTML = '';
+    const sw = document.getElementById('specs-panel-wrap');
+    if (sw) { sw.style.display = 'none'; document.getElementById('specs-panel')?.classList.remove('open'); }
     content.innerHTML = renderInstrucciones();
   } else if (currentView === 'glosario') {
     title.textContent = 'Glosario';
