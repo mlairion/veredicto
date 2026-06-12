@@ -464,6 +464,9 @@ const LS_PROJECT  = 'vrd_current_project';
 const LS_SB_URL   = 'vrd_sb_url';
 const LS_SB_KEY   = 'vrd_sb_key';
 
+const DEFAULT_SB_URL = 'https://tjsoqcdyfvvgusaruwqa.supabase.co';
+const DEFAULT_SB_KEY = 'sb_publishable_Z6g4MPrRBdht_EqT-k1Vow_r7PB1rXc';
+
 // ══════════════════════════════════════════════════════
 // LOCAL STORAGE
 // ══════════════════════════════════════════════════════
@@ -484,8 +487,8 @@ function saveLocal() {
 // SUPABASE
 // ══════════════════════════════════════════════════════
 function initSupabase() {
-  const url = localStorage.getItem(LS_SB_URL);
-  const key = localStorage.getItem(LS_SB_KEY);
+  const url = localStorage.getItem(LS_SB_URL) || DEFAULT_SB_URL;
+  const key = localStorage.getItem(LS_SB_KEY) || DEFAULT_SB_KEY;
   if (url && key && window.supabase) {
     try { sb = window.supabase.createClient(url, key); } catch(e) { sb = null; }
   }
