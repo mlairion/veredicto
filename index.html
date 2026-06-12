@@ -472,6 +472,7 @@ let currentProjectId = null;
 let currentView = 'compare';
 let filterMin = null, filterMax = null;
 let hiddenProductIds = new Set();
+let hiddenSpecs = new Set();
 let specFilter = '';
 let hideIdentical = false;
 let darkMode = localStorage.getItem('vrd_dark') !== 'false';
@@ -1016,6 +1017,12 @@ function toggleProductVisibility(id) {
   renderContent();
 }
 
+function toggleSpec(key) {
+  if (hiddenSpecs.has(key)) hiddenSpecs.delete(key);
+  else hiddenSpecs.add(key);
+  renderContent();
+}
+
 function toggleTheme() {
   darkMode = !darkMode;
   localStorage.setItem('vrd_dark', darkMode);
@@ -1101,10 +1108,16 @@ function renderTable(prods) {
     filteredSpecKeys.forEach(key => {
       const vals = visProds.map(p => (p.specs||{})[key] || null);
       if (vals.every(v => v == null)) return;
-      const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
-      h += `<tr><td class="col-spec">${esc(key)}</td>`;
+      const hidden = hiddenSpecs.has(key);
+      const allSame = !hidden && vals.every(v => v === vals[0]) && vals[0] != null;
+      const keyEsc = esc(key).replace(/'/g, "\\'");
+      h += `<tr style="${hidden?'opacity:.4':''}">
+        <td class="col-spec" style="display:flex;align-items:center;gap:6px">
+          <input type="checkbox" ${hidden?'':'checked'} onchange="toggleSpec('${keyEsc}')" style="accent-color:var(--accent);flex-shrink:0">
+          ${esc(key)}
+        </td>`;
       vals.forEach(v => {
-        h += `<td class="col-value ${allSame?'muted':''}">${v ? esc(v) : '<span class="empty">—</span>'}</td>`;
+        h += `<td class="col-value ${allSame?'muted':''}">${!hidden && v ? esc(v) : '<span class="empty">—</span>'}</td>`;
       });
       h += `</tr>`;
     });
