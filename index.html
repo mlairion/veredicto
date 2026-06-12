@@ -939,7 +939,7 @@ function renderContent() {
       </div>
       <div class="filter-group">
         <label>Specs</label>
-        <input class="filter-input" id="spec-filter" type="text" placeholder="buscar..." value="${esc(specFilter)}" style="width:90px">
+        <input class="filter-input" id="spec-filter" type="search" placeholder="buscar..." value="${esc(specFilter)}" autocomplete="off" style="width:90px">
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
           <input type="checkbox" ${hideIdentical?'checked':''} onchange="hideIdentical=this.checked;renderContent()"> Ocultar iguales
         </label>
@@ -1112,9 +1112,11 @@ function renderTable(prods) {
       const allSame = !hidden && vals.every(v => v === vals[0]) && vals[0] != null;
       const keyEsc = esc(key).replace(/'/g, "\\'");
       h += `<tr style="${hidden?'opacity:.4':''}">
-        <td class="col-spec" style="display:flex;align-items:center;gap:6px">
-          <input type="checkbox" ${hidden?'':'checked'} onchange="toggleSpec('${keyEsc}')" style="accent-color:var(--accent);flex-shrink:0">
-          ${esc(key)}
+        <td class="col-spec">
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="checkbox" ${hidden?'':'checked'} onchange="toggleSpec('${keyEsc}')" style="accent-color:var(--accent);flex-shrink:0;cursor:pointer">
+            ${esc(key)}
+          </div>
         </td>`;
       vals.forEach(v => {
         h += `<td class="col-value ${allSame?'muted':''}">${!hidden && v ? esc(v) : '<span class="empty">—</span>'}</td>`;
