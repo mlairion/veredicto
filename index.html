@@ -1158,6 +1158,7 @@ function renderTable(prods) {
   const seen = new Set();
   visProds.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
   const filteredSpecKeys = specKeys.filter(k => {
+    if (hiddenSpecs.has(k)) return false;
     if (specFilter && !k.toLowerCase().includes(specFilter.toLowerCase())) return false;
     if (hideIdentical) {
       const vals = visProds.map(p => (p.specs||{})[k] || null);
@@ -1237,13 +1238,11 @@ function renderTable(prods) {
     filteredSpecKeys.forEach(key => {
       const vals = visProds.map(p => (p.specs||{})[key] || null);
       if (vals.every(v => v == null)) return;
-      const hidden = hiddenSpecs.has(key);
-      const allSame = !hidden && vals.every(v => v === vals[0]) && vals[0] != null;
-      const keyEsc = esc(key).replace(/'/g, "\\'");
+      const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
       h += `<tr>
         <td class="col-spec">${esc(key)}</td>`;
       vals.forEach(v => {
-        h += `<td class="col-value ${allSame?'muted':''}">${!hidden && v ? esc(v) : '<span style="color:var(--text3)">—</span>'}</td>`;
+        h += `<td class="col-value ${allSame?'muted':''}">${v ? esc(v) : '<span style="color:var(--text3)">—</span>'}</td>`;
       });
       h += `</tr>`;
     });
