@@ -1202,7 +1202,7 @@ function renderTable(prods) {
       h += `<tr>
         <td class="col-spec">${esc(key)}</td>`;
       vals.forEach(v => {
-        h += `<td class="col-value ${allSame?'muted':''}">${!hidden && v ? esc(v) : '<span class="empty">—</span>'}</td>`;
+        h += `<td class="col-value ${allSame?'muted':''}">${!hidden && v ? esc(v) : '<span style="color:var(--text3)">—</span>'}</td>`;
       });
       h += `</tr>`;
     });
