@@ -467,6 +467,25 @@ const LS_SB_KEY   = 'vrd_sb_key';
 const DEFAULT_SB_URL = 'https://tjsoqcdyfvvgusaruwqa.supabase.co';
 const DEFAULT_SB_KEY = 'sb_publishable_Z6g4MPrRBdht_EqT-k1Vow_r7PB1rXc';
 
+const ML_CLIENT_ID     = '1900769067249520';
+const ML_CLIENT_SECRET = 'L9fakGVCmkpfSqdzB6CedMnLf4nMR0q2';
+let _mlToken = null;
+let _mlTokenExpiry = 0;
+
+async function getMLToken() {
+  if (_mlToken && Date.now() < _mlTokenExpiry - 60000) return _mlToken;
+  const resp = await fetch('https://api.mercadolibre.com/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+    body: `grant_type=client_credentials&client_id=${ML_CLIENT_ID}&client_secret=${ML_CLIENT_SECRET}`
+  });
+  if (!resp.ok) throw new Error('No se pudo autenticar con MercadoLibre.');
+  const d = await resp.json();
+  _mlToken = d.access_token;
+  _mlTokenExpiry = Date.now() + (d.expires_in || 21600) * 1000;
+  return _mlToken;
+}
+
 // ══════════════════════════════════════════════════════
 // LOCAL STORAGE
 // ══════════════════════════════════════════════════════
@@ -556,46 +575,63 @@ function extractMlaId(url) {
 }
 
 async function fetchMLProduct(url) {
-  const id = extractMlaId(url);
-  if (!id) throw new Error('No encontré un código de producto (MLA...) en esa URL.');
+  // Catalog page: mercadolibre.com.ar/p/MLA123
+  const catalogMatch = url.match(/\/p\/(MLA\d+)/i);
+  // Regular listing: MLA123456789 in path
+  const itemMatch = url.match(/[/\-](MLA[\d]+)(?:[_\-#?]|$)/i) || url.match(/\b(MLA\d{6,})\b/i);
 
-  const resp = await fetch(`https://api.mercadolibre.com/items/${id}`);
-  if (!resp.ok) throw new Error('Producto no encontrado. Verificá el link.');
-  const item = await resp.json();
+  if (!catalogMatch && !itemMatch) {
+    throw new Error('No encontré un código de producto (MLA...) en esa URL.');
+  }
 
-  // Specs from attributes
   const specs = {};
-  (item.attributes || []).forEach(a => {
+  const extractSpecs = attrs => (attrs || []).forEach(a => {
     if (a.value_name && a.value_name !== 'N/A') specs[a.name] = a.value_name;
   });
 
-  // Photos
-  const photos = (item.pictures || [])
-    .map(p => p.secure_url || p.url || '').filter(s => s.startsWith('http')).slice(0, 6);
-  if (!photos.length && item.thumbnail) photos.push(item.thumbnail.replace('-I.jpg', '-O.jpg'));
+  const token = await getMLToken();
+  const authHeaders = { 'Authorization': `Bearer ${token}` };
 
-  // Reviews
-  let rating = null, reviews = null;
-  try {
-    const rr = await fetch(`https://api.mercadolibre.com/reviews/item/${id}`);
-    if (rr.ok) {
-      const rd = await rr.json();
-      if (rd.rating_average) rating = rd.rating_average.toFixed(1);
-      if (rd.paging?.total) reviews = String(rd.paging.total);
-    }
-  } catch {}
+  if (catalogMatch) {
+    // Products API (catalog pages)
+    const id = catalogMatch[1].toUpperCase();
+    const resp = await fetch(`https://api.mercadolibre.com/products/${id}`, { headers: authHeaders });
+    if (!resp.ok) throw new Error('Producto no encontrado. Verificá el link.');
+    const item = await resp.json();
 
-  return {
-    id,
-    title: item.title,
-    price: item.price,
-    rating,
-    reviews,
-    specs,
-    photos,
-    link: item.permalink || url,
-    addedAt: new Date().toISOString()
-  };
+    extractSpecs(item.attributes);
+    const photos = (item.pictures || [])
+      .map(p => p.url || p.secure_url || '').filter(s => s.startsWith('http')).slice(0, 6);
+    const price = item.buy_box_winner?.price || null;
+    const rating = item.reviews?.rating_average ? String(item.reviews.rating_average.toFixed(1)) : null;
+    const reviews = item.reviews?.total ? String(item.reviews.total) : null;
+
+    return { id, title: item.name, price, rating, reviews, specs, photos, link: url, addedAt: new Date().toISOString() };
+
+  } else {
+    // Items API (regular listings)
+    const id = itemMatch[1].toUpperCase();
+    const resp = await fetch(`https://api.mercadolibre.com/items/${id}`, { headers: authHeaders });
+    if (!resp.ok) throw new Error('Producto no encontrado. Verificá el link.');
+    const item = await resp.json();
+
+    extractSpecs(item.attributes);
+    const photos = (item.pictures || [])
+      .map(p => p.secure_url || p.url || '').filter(s => s.startsWith('http')).slice(0, 6);
+    if (!photos.length && item.thumbnail) photos.push(item.thumbnail.replace('-I.jpg', '-O.jpg'));
+
+    let rating = null, reviews = null;
+    try {
+      const rr = await fetch(`https://api.mercadolibre.com/reviews/item/${id}`, { headers: authHeaders });
+      if (rr.ok) {
+        const rd = await rr.json();
+        if (rd.rating_average) rating = rd.rating_average.toFixed(1);
+        if (rd.paging?.total) reviews = String(rd.paging.total);
+      }
+    } catch {}
+
+    return { id, title: item.title, price: item.price, rating, reviews, specs, photos, link: item.permalink || url, addedAt: new Date().toISOString() };
+  }
 }
 
 // ══════════════════════════════════════════════════════
