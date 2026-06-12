@@ -5,703 +5,1261 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Veredicto</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #111;
-  --bg2: #1a1a1a;
-  --bg3: #222;
-  --border: #2a2a2a;
-  --border2: #333;
-  --text: #f0f0f0;
-  --text2: #999;
-  --text3: #555;
-  --accent: #3483fa;
-  --accent-dark: #2968c8;
-  --best: #22c55e;
-  --best-bg: #052010;
-  --worst-bg: #1a0505;
-  --yellow: #ffe400;
-  --radius: 8px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-body { background: var(--bg); color: var(--text); min-height: 100vh; }
-
-/* HEADER */
-.header {
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.header-left { display: flex; align-items: center; gap: 10px; }
-.logo {
-  background: var(--yellow);
-  color: #111;
-  font-size: 13px;
-  font-weight: 800;
-  padding: 4px 9px;
-  border-radius: 6px;
-  letter-spacing: -0.3px;
-}
-.header h1 { font-size: 15px; font-weight: 600; color: var(--text); }
-.header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-/* PRICE FILTER */
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 5px 10px;
-}
-.filter-group label { font-size: 11px; color: var(--text2); white-space: nowrap; }
-.filter-input {
-  width: 90px;
-  background: none;
-  border: none;
-  color: var(--text);
-  font-size: 12px;
-  font-family: inherit;
-  outline: none;
-}
-.filter-input::placeholder { color: var(--text3); }
-.filter-sep { color: var(--text3); font-size: 12px; }
-.btn-filter {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .1s;
-  white-space: nowrap;
-}
-.btn-filter:hover { background: var(--accent-dark); }
-.btn-clear {
-  background: var(--bg3);
-  color: var(--text2);
-  border: 1px solid var(--border2);
-  border-radius: 5px;
-  padding: 5px 12px;
-  font-size: 12px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .1s;
-  white-space: nowrap;
-}
-.btn-clear:hover { color: var(--text); border-color: #555; }
-
-/* PRODUCT COUNT */
-.product-count {
-  font-size: 11px;
-  color: var(--text2);
-  padding: 5px 0;
-  white-space: nowrap;
-}
-.product-count span { color: var(--accent); font-weight: 600; }
-
-/* HIDDEN NOTICE */
-.hidden-notice {
-  background: var(--bg2);
-  border-bottom: 1px solid var(--border);
-  padding: 6px 20px;
-  font-size: 11px;
-  color: var(--text2);
-  display: none;
-}
-.hidden-notice.visible { display: block; }
-
-/* TABLE WRAPPER */
-.table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 20px;
-  padding-bottom: 40px;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#111;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;
+  --border:#2a2a2a;--border2:#333;--border3:#3a3a3a;
+  --text:#f0f0f0;--text2:#999;--text3:#555;
+  --accent:#3483fa;--accent-dark:#2a6fd4;
+  --best:#22c55e;--best-bg:#0a1f12;
+  --red:#f87171;--red-bg:#1f0a0a;
+  --yellow:#ffe400;
+  --sidebar:240px;
+  --radius:8px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
 
-/* COMPARISON TABLE */
-.cmp-table {
-  border-collapse: collapse;
-  width: 100%;
-  min-width: max-content;
+/* ── LAYOUT ─────────────────────────────────────────────────────── */
+body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;
+}
+.main{flex:1;margin-left:var(--sidebar);display:flex;flex-direction:column;min-height:100vh}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────────── */
+.sb-header{
+  padding:14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.sb-logo{display:flex;align-items:center;gap:8px}
+.logo{background:var(--yellow);color:#111;font-size:12px;font-weight:800;padding:3px 8px;border-radius:5px}
+.brand{font-size:15px;font-weight:600}
+
+.sb-user{
+  padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.user-info{display:flex;align-items:center;gap:8px}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;
+}
+.user-email{font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-logout{font-size:10px;color:var(--text3);background:none;border:none;cursor:pointer;font-family:inherit;margin-left:auto;flex-shrink:0}
+.btn-logout:hover{color:var(--red)}
+
+.sb-section{padding:10px 0;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-section-hd{
+  padding:4px 14px 6px;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;
+}
+.btn-new-proj{
+  background:none;border:none;color:var(--text3);cursor:pointer;
+  font-size:18px;line-height:1;padding:0 2px;
+  transition:color .1s;
+}
+.btn-new-proj:hover{color:var(--accent)}
+
+.proj-item{
+  padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:7px;
+  transition:background .1s;border-radius:0;
+}
+.proj-item:hover{background:var(--bg3)}
+.proj-item.active{background:rgba(52,131,250,.1);border-right:2px solid var(--accent)}
+.proj-name{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.proj-count{
+  font-size:10px;background:var(--bg4);color:var(--text2);
+  padding:1px 6px;border-radius:10px;flex-shrink:0;
+}
+.proj-item.active .proj-name{color:var(--accent)}
+
+.sb-nav{padding:6px 0;flex-shrink:0}
+.nav-item{
+  width:100%;padding:9px 14px;background:none;border:none;
+  color:var(--text2);font-size:13px;font-family:inherit;cursor:pointer;
+  text-align:left;display:flex;align-items:center;gap:8px;transition:all .1s;
+}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{color:var(--accent)}
+
+.sb-footer{margin-top:auto;border-top:1px solid var(--border);padding:6px 0;flex-shrink:0}
+
+/* ── TOPBAR ──────────────────────────────────────────────────────── */
+.topbar{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:12px 20px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50;flex-shrink:0;
+}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-hamburger{
+  display:none;background:none;border:none;color:var(--text2);
+  font-size:20px;cursor:pointer;padding:2px 6px;
 }
 
-/* SPEC LABEL COLUMN */
-.col-spec {
-  position: sticky;
-  left: 0;
-  background: var(--bg2);
-  border-right: 1px solid var(--border2);
-  z-index: 10;
-  width: 160px;
-  min-width: 140px;
-  max-width: 180px;
-  padding: 10px 14px;
-  font-size: 12px;
-  color: var(--text2);
-  font-weight: 400;
-  text-align: left;
-  white-space: nowrap;
-}
-.col-spec.header-spec {
-  background: var(--bg);
-  border-bottom: 1px solid var(--border2);
-  vertical-align: bottom;
-  padding-bottom: 12px;
-  font-size: 11px;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+/* ── CONTENT ─────────────────────────────────────────────────────── */
+#content{flex:1;padding:20px;overflow-x:auto}
 
-/* PRODUCT COLUMN */
-.col-product {
-  min-width: 190px;
-  max-width: 220px;
-  padding: 12px 14px;
-  border-right: 1px solid var(--border);
-  vertical-align: top;
+/* ── FILTER BAR ──────────────────────────────────────────────────── */
+.filter-group{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);padding:5px 10px;
 }
-.col-product:last-child { border-right: none; }
+.filter-group label{font-size:11px;color:var(--text2);white-space:nowrap}
+.filter-input{
+  width:80px;background:none;border:none;color:var(--text);
+  font-size:12px;font-family:inherit;outline:none;
+}
+.filter-input::placeholder{color:var(--text3)}
+.filter-sep{color:var(--text3);font-size:12px}
 
-/* PRODUCT HEADER CARD */
-.product-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+/* ── BUTTONS ─────────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:var(--radius);border:none;
+  font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .1s;
 }
-.product-img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  border-radius: 6px;
-  background: #fff;
-  padding: 4px;
-  align-self: center;
-}
-.product-img-placeholder {
-  width: 80px;
-  height: 80px;
-  background: var(--bg3);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  align-self: center;
-}
-.product-name {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.product-price {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text);
-}
-.product-price.best-price { color: var(--best); }
-.product-price.worst-price { color: #f87171; }
-.product-rating {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--text2);
-}
-.star { color: var(--yellow); }
-.rating-val { color: var(--text); font-weight: 600; }
-.product-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 2px;
-}
-.btn-link {
-  font-size: 11px;
-  color: var(--accent);
-  text-decoration: none;
-  padding: 3px 7px;
-  border: 1px solid var(--accent);
-  border-radius: 4px;
-  transition: all .1s;
-}
-.btn-link:hover { background: var(--accent); color: #fff; }
-.btn-remove {
-  font-size: 11px;
-  color: var(--text3);
-  background: none;
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  padding: 3px 7px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all .1s;
-}
-.btn-remove:hover { color: #f87171; border-color: #f87171; }
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-secondary{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.btn-secondary:hover{color:var(--text);border-color:#555}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}
 
-/* TABLE ROWS */
-.cmp-table tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background .1s;
-}
-.cmp-table tbody tr:hover .col-value { background: rgba(255,255,255,.02); }
-.cmp-table tbody tr:hover .col-spec { background: #1f1f1f; }
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* VALUE CELLS */
-.col-value {
-  padding: 9px 14px;
-  font-size: 12px;
-  color: var(--text);
-  border-right: 1px solid var(--border);
-  vertical-align: middle;
-  text-align: left;
+/* ── COMPARISON TABLE ────────────────────────────────────────────── */
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmp-table{border-collapse:collapse;min-width:max-content;width:100%}
+.col-spec{
+  position:sticky;left:0;background:var(--bg2);border-right:1px solid var(--border2);z-index:10;
+  width:155px;min-width:140px;padding:9px 13px;font-size:12px;color:var(--text2);text-align:left;white-space:nowrap;
 }
-.col-value:last-child { border-right: none; }
-.col-value.best-val {
-  background: var(--best-bg);
-  color: var(--best);
-  font-weight: 600;
-}
-.col-value.empty-val { color: var(--text3); font-style: italic; }
-.col-value.all-same { color: var(--text3); }
+.col-spec.hd{background:var(--bg);border-bottom:1px solid var(--border2);vertical-align:bottom;padding-bottom:10px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.col-product{min-width:185px;max-width:215px;padding:11px 13px;border-right:1px solid var(--border);vertical-align:top}
+.col-product:last-child{border-right:none}
+.product-header{display:flex;flex-direction:column;gap:5px}
+.product-img{width:76px;height:76px;object-fit:contain;border-radius:6px;background:#fff;padding:3px;align-self:center}
+.product-img-ph{width:76px;height:76px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:26px;align-self:center}
+.product-name{font-size:12px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.product-price{font-size:16px;font-weight:700}
+.product-price.best{color:var(--best)}
+.product-price.worst{color:var(--red)}
+.product-rating{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px}
+.star{color:var(--yellow)}
+.product-actions{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+.btn-link{font-size:11px;color:var(--accent);text-decoration:none;padding:3px 7px;border:1px solid var(--accent);border-radius:4px;transition:all .1s}
+.btn-link:hover{background:var(--accent);color:#fff}
+.btn-remove{font-size:11px;color:var(--text3);background:none;border:1px solid var(--border2);border-radius:4px;padding:3px 7px;cursor:pointer;font-family:inherit;transition:all .1s}
+.btn-remove:hover{color:var(--red);border-color:var(--red)}
+.cmp-table tbody tr{border-bottom:1px solid var(--border)}
+.col-value{padding:8px 13px;font-size:12px;color:var(--text);border-right:1px solid var(--border);vertical-align:middle}
+.col-value:last-child{border-right:none}
+.col-value.best-val{background:var(--best-bg);color:var(--best);font-weight:600}
+.col-value.muted{color:var(--text3)}
+.col-value.empty{color:var(--text3);font-style:italic}
+tr.row-sep{height:0}
+tr.row-sep td{padding:0;border:none;background:var(--bg);font-size:10px;color:var(--text3);padding:8px 13px 3px;text-transform:uppercase;letter-spacing:.6px}
+tr.row-key .col-spec{color:var(--text);font-weight:500}
 
-/* ROW TYPES */
-tr.row-price .col-spec { color: var(--text); font-weight: 600; }
-tr.row-rating .col-spec { color: var(--text); font-weight: 500; }
-tr.row-separator { height: 6px; background: var(--bg); }
-tr.row-separator td { padding: 0; border: none; background: var(--bg); font-size: 10px; color: var(--text3); padding-left: 14px; padding-top: 10px; text-transform: uppercase; letter-spacing: 0.6px; }
+/* ── EMPTY STATES ────────────────────────────────────────────────── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:70px 20px;text-align:center;gap:10px}
+.empty-icon{font-size:48px}
+.empty h2{font-size:17px;font-weight:600}
+.empty p{font-size:13px;color:var(--text2);line-height:1.6;max-width:340px}
 
-/* EMPTY STATE */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  text-align: center;
-  gap: 12px;
+/* ── MODAL ───────────────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:300;align-items:center;justify-content:center;padding:16px;
 }
-.empty-icon { font-size: 52px; }
-.empty-state h2 { font-size: 18px; font-weight: 600; color: var(--text); }
-.empty-state p { font-size: 14px; color: var(--text2); line-height: 1.6; max-width: 380px; }
-.empty-steps {
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 18px 24px;
-  text-align: left;
-  max-width: 380px;
-  width: 100%;
-  margin-top: 4px;
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:12px;
+  width:100%;padding:20px;max-height:90vh;overflow-y:auto;
 }
-.empty-steps h3 { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-.empty-steps ol { padding-left: 18px; display: flex; flex-direction: column; gap: 7px; }
-.empty-steps li { font-size: 13px; color: var(--text2); line-height: 1.5; }
-.empty-steps li strong { color: var(--text); }
+.modal-sm{max-width:380px}
+.modal-md{max-width:520px}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-hd h2{font-size:15px;font-weight:600}
+.btn-close{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:2px}
+.btn-close:hover{color:var(--text)}
 
-/* SCROLLBAR */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #444; }
-
-/* RESPONSIVE */
-@media (max-width: 600px) {
-  .header { padding: 10px 14px; gap: 8px; }
-  .filter-group { padding: 5px 8px; }
-  .filter-input { width: 70px; }
-  .table-wrap { padding: 12px; }
-  .col-spec { width: 120px; min-width: 110px; font-size: 11px; padding: 8px 10px; }
-  .col-product { min-width: 160px; padding: 10px; }
-  .col-value { padding: 8px 10px; }
+.tabs-hd{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab-btn{
+  padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;
+  background:none;border:none;color:var(--text3);font-family:inherit;
+  border-bottom:2px solid transparent;transition:all .15s;
 }
+.tab-btn.active{color:var(--text);border-bottom-color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-/* TOAST */
-.toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 10px 18px;
-  font-size: 13px;
-  color: var(--text);
-  box-shadow: 0 4px 20px rgba(0,0,0,.5);
-  transition: transform .3s ease;
-  z-index: 999;
-  white-space: nowrap;
+.frow{margin-bottom:12px}
+.frow label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px}
+.frow input,.frow textarea,.frow select{
+  width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);
+  font-size:13px;background:var(--bg3);color:var(--text);font-family:inherit;
 }
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.ok { border-color: var(--best); color: var(--best); }
-.toast.err { border-color: #f87171; color: #f87171; }
+.frow input:focus,.frow textarea:focus,.frow select:focus{outline:none;border-color:var(--accent)}
+.frow .hint{font-size:10px;color:var(--text3);margin-top:4px;line-height:1.5}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.frow textarea{resize:vertical;min-height:70px}
+
+.status-msg{font-size:12px;margin-top:8px;min-height:16px}
+.status-msg.ok{color:var(--best)}
+.status-msg.err{color:var(--red)}
+
+.product-preview-card{
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:12px;margin-bottom:12px;display:none;
+}
+.pcard-title{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.4}
+.pcard-price{font-size:16px;font-weight:700;color:var(--accent);margin-bottom:3px}
+.pcard-rating{font-size:11px;color:var(--text2);margin-bottom:6px}
+.pcard-specs{font-size:11px;color:var(--text2);line-height:1.8;max-height:120px;overflow-y:auto}
+.pcard-specs span{color:var(--text)}
+
+/* ── INSTRUCCIONES / GLOSARIO / AJUSTES ──────────────────────────── */
+.page-content{max-width:640px}
+.page-content h2{font-size:18px;font-weight:600;margin-bottom:4px}
+.page-content .subtitle{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5}
+.step-list{display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.step{display:flex;gap:12px}
+.step-num{
+  width:26px;height:26px;border-radius:50%;background:rgba(52,131,250,.15);
+  color:var(--accent);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-body h3{font-size:13px;font-weight:600;margin-bottom:2px}
+.step-body p{font-size:13px;color:var(--text2);line-height:1.5}
+.step-body a{color:var(--accent)}
+.code-block{
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:12px;font-family:monospace;font-size:12px;color:var(--text2);
+  white-space:pre-wrap;word-break:break-all;margin:8px 0;
+}
+.section-hd{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:20px}
+.glossary-table{width:100%;border-collapse:collapse}
+.glossary-table tr{border-bottom:1px solid var(--border)}
+.glossary-table td{padding:10px 6px;font-size:13px;vertical-align:top}
+.glossary-table td:first-child{color:var(--text);font-weight:500;width:160px;white-space:nowrap}
+.glossary-table td:last-child{color:var(--text2);line-height:1.5}
+.settings-block{
+  background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:16px;margin-bottom:16px;
+}
+.settings-block h3{font-size:13px;font-weight:600;margin-bottom:10px}
+.sync-status{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;margin-top:8px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.sync-dot.ok{background:var(--best)}
+.sync-dot.err{background:var(--red)}
+.sync-dot.busy{background:var(--yellow);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── COUNT BADGE ─────────────────────────────────────────────────── */
+.prod-count{font-size:11px;color:var(--text2);white-space:nowrap}
+.prod-count b{color:var(--accent)}
+
+/* ── TOAST ───────────────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:9px 18px;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,.5);
+  transition:transform .3s ease;z-index:999;white-space:nowrap;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--best);color:var(--best)}
+.toast.err{border-color:var(--red);color:var(--red)}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────── */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+@media(max-width:780px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s;position:fixed}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar.open~.sidebar-overlay{display:block}
+  .main{margin-left:0}
+  .btn-hamburger{display:block}
+  #content{padding:14px}
+  .topbar{padding:10px 14px}
+}
+@media(max-width:480px){
+  .filter-group{display:none}
+  .modal{padding:16px}
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <div class="logo">ML</div>
-    <h1>Veredicto</h1>
+<!-- ── SIDEBAR ───────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">
+      <div class="logo">ML</div>
+      <span class="brand">Veredicto</span>
+    </div>
   </div>
-  <div class="header-right">
-    <div class="filter-group">
-      <label>Precio</label>
-      <input class="filter-input" id="price-min" type="number" placeholder="mín" min="0">
-      <span class="filter-sep">—</span>
-      <input class="filter-input" id="price-max" type="number" placeholder="máx" min="0">
-      <button class="btn-filter" onclick="applyFilter()">Filtrar</button>
+
+  <div class="sb-user" id="sb-user">
+    <button class="btn btn-secondary btn-sm" onclick="openModal('modal-login')" style="width:100%">Iniciar sesión</button>
+  </div>
+
+  <div class="sb-section" id="projects-section">
+    <div class="sb-section-hd">
+      <span>Mis comparaciones</span>
+      <button class="btn-new-proj" onclick="openModal('modal-new-project')" title="Nueva comparación">+</button>
     </div>
-    <div class="product-count" id="product-count" style="display:none">
-      <span id="count-visible">0</span> de <span id="count-total">0</span> productos
+    <div id="project-list"></div>
+  </div>
+
+  <div class="sb-nav">
+    <button class="nav-item" onclick="setView('instrucciones')">📖 Instrucciones</button>
+    <button class="nav-item" onclick="setView('glosario')">📚 Glosario</button>
+  </div>
+
+  <div class="sb-footer">
+    <button class="nav-item" onclick="setView('ajustes')">⚙️ Ajustes</button>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- ── MAIN ──────────────────────────────────────────────────────── -->
+<main class="main">
+  <div class="topbar" id="topbar">
+    <div class="topbar-left">
+      <button class="btn-hamburger" onclick="toggleSidebar()">☰</button>
+      <h1 class="topbar-title" id="topbar-title">Veredicto</h1>
     </div>
-    <button class="btn-clear" onclick="clearAll()" id="btn-clear" style="display:none">Limpiar todo</button>
+    <div class="topbar-right" id="topbar-right"></div>
+  </div>
+  <div id="content"></div>
+</main>
+
+<!-- ── MODAL: LOGIN ───────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal modal-sm">
+    <div class="modal-hd">
+      <h2 id="login-title">Iniciar sesión</h2>
+      <button class="btn-close" onclick="closeModal('modal-login')">✕</button>
+    </div>
+    <div class="tabs-hd">
+      <button class="tab-btn active" onclick="switchLoginTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchLoginTab('register')">Crear cuenta</button>
+    </div>
+    <div class="tab-panel active" id="tab-login">
+      <div class="frow"><label>Email</label><input type="email" id="login-email" placeholder="tu@email.com"></div>
+      <div class="frow"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Entrar</button>
+    </div>
+    <div class="tab-panel" id="tab-register">
+      <div class="frow"><label>Email</label><input type="email" id="reg-email" placeholder="tu@email.com"></div>
+      <div class="frow"><label>Contraseña</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doRegister()">Crear cuenta</button>
+    </div>
+    <div class="status-msg" id="login-status"></div>
+    <div style="margin-top:12px;text-align:center">
+      <button class="btn btn-secondary" style="width:100%;font-size:12px" onclick="closeModal('modal-login')">Continuar sin cuenta (solo local)</button>
+    </div>
   </div>
 </div>
 
-<div class="hidden-notice" id="hidden-notice"></div>
+<!-- ── MODAL: NUEVO PROYECTO ─────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-new-project">
+  <div class="modal modal-sm">
+    <div class="modal-hd">
+      <h2>Nueva comparación</h2>
+      <button class="btn-close" onclick="closeModal('modal-new-project')">✕</button>
+    </div>
+    <div class="frow">
+      <label>Nombre</label>
+      <input type="text" id="new-proj-name" placeholder="ej: Pavas eléctricas, Laptops...">
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="createProject()">Crear</button>
+  </div>
+</div>
 
-<div id="app"></div>
+<!-- ── MODAL: AGREGAR PRODUCTO ────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-add-product">
+  <div class="modal modal-md">
+    <div class="modal-hd">
+      <h2>Agregar producto</h2>
+      <button class="btn-close" onclick="closeModal('modal-add-product')">✕</button>
+    </div>
+    <div class="tabs-hd">
+      <button class="tab-btn active" onclick="switchAddTab('url')">Por link de ML</button>
+      <button class="tab-btn" onclick="switchAddTab('manual')">Manual</button>
+    </div>
 
+    <!-- TAB: URL -->
+    <div class="tab-panel active" id="tab-url">
+      <div class="frow">
+        <label>Pegá el link del producto en MercadoLibre</label>
+        <input type="text" id="add-url" placeholder="https://www.mercadolibre.com.ar/pava-oster-MLA123456...">
+        <div class="hint">Funciona con cualquier URL de mercadolibre.com.ar que tenga un código MLA en la dirección.</div>
+      </div>
+      <button class="btn btn-primary" onclick="fetchByUrl()">🔍 Buscar producto</button>
+      <div class="status-msg" id="url-status"></div>
+      <div class="product-preview-card" id="url-preview">
+        <div class="pcard-title" id="pcard-title"></div>
+        <div class="pcard-price" id="pcard-price"></div>
+        <div class="pcard-rating" id="pcard-rating"></div>
+        <div class="pcard-specs" id="pcard-specs"></div>
+      </div>
+      <button class="btn btn-primary" id="btn-add-url" onclick="addFromUrl()" style="display:none;margin-top:2px;width:100%">✓ Agregar al comparador</button>
+    </div>
+
+    <!-- TAB: MANUAL -->
+    <div class="tab-panel" id="tab-manual">
+      <div class="frow"><label>Nombre / modelo *</label><input type="text" id="m-title" placeholder="ej: Pava Oster BVSTKT7098"></div>
+      <div class="fgrid2">
+        <div class="frow"><label>Precio ($)</label><input type="number" id="m-price" placeholder="45999"></div>
+        <div class="frow"><label>Link (opcional)</label><input type="text" id="m-link" placeholder="https://..."></div>
+      </div>
+      <div class="fgrid2">
+        <div class="frow"><label>Rating (ej: 4.5)</label><input type="number" id="m-rating" step="0.1" min="0" max="5" placeholder="4.5"></div>
+        <div class="frow"><label>Opiniones</label><input type="number" id="m-reviews" placeholder="1234"></div>
+      </div>
+      <div class="frow">
+        <label>Especificaciones técnicas</label>
+        <div class="hint" style="margin-bottom:6px">Una por línea, formato: Nombre: Valor (ej: Potencia: 1500 W)</div>
+        <textarea id="m-specs" placeholder="Capacidad: 1.7 L&#10;Potencia: 1500 W&#10;Material: Acero inoxidable"></textarea>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="addManual()">✓ Agregar al comparador</button>
+      <div class="status-msg" id="manual-status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const STORAGE_KEY = 'ml_comparador_products';
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let projects = [];
+let products = {};   // { [projectId]: [...] }
+let currentProjectId = null;
+let currentView = 'compare';
+let filterMin = null, filterMax = null;
+let sb = null;       // supabase client
+let sbUser = null;   // logged in user
+let urlPendingProduct = null;  // fetched product waiting to be added
 
-let products = [];
-let filterMin = null;
-let filterMax = null;
+const LS_PROJECTS = 'vrd_projects';
+const LS_PRODUCTS = 'vrd_products';
+const LS_PROJECT  = 'vrd_current_project';
+const LS_SB_URL   = 'vrd_sb_url';
+const LS_SB_KEY   = 'vrd_sb_key';
 
-// ── STORAGE ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+// LOCAL STORAGE
+// ══════════════════════════════════════════════════════
+function loadLocal() {
+  try { projects = JSON.parse(localStorage.getItem(LS_PROJECTS)) || []; } catch { projects = []; }
+  try { products = JSON.parse(localStorage.getItem(LS_PRODUCTS)) || {}; } catch { products = {}; }
+  currentProjectId = localStorage.getItem(LS_PROJECT) || null;
+  if (currentProjectId && !projects.find(p => p.id === currentProjectId)) currentProjectId = null;
+  if (!currentProjectId && projects.length) currentProjectId = projects[0].id;
+}
+function saveLocal() {
+  localStorage.setItem(LS_PROJECTS, JSON.stringify(projects));
+  localStorage.setItem(LS_PRODUCTS, JSON.stringify(products));
+  if (currentProjectId) localStorage.setItem(LS_PROJECT, currentProjectId);
+}
 
-function loadProducts() {
+// ══════════════════════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════════════════════
+function initSupabase() {
+  const url = localStorage.getItem(LS_SB_URL);
+  const key = localStorage.getItem(LS_SB_KEY);
+  if (url && key && window.supabase) {
+    try { sb = window.supabase.createClient(url, key); } catch(e) { sb = null; }
+  }
+}
+
+async function sbLogin(email, password) {
+  if (!sb) throw new Error('Supabase no configurado. Configuralo en Ajustes primero.');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data.user;
+}
+
+async function sbRegister(email, password) {
+  if (!sb) throw new Error('Supabase no configurado. Configuralo en Ajustes primero.');
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) throw new Error(error.message);
+  return data.user;
+}
+
+async function sbLogout() {
+  if (sb) await sb.auth.signOut();
+  sbUser = null;
+  renderUserZone();
+  showToast('Sesión cerrada');
+}
+
+async function sbSync(direction = 'push') {
+  if (!sb || !sbUser) return;
+  setSyncStatus('busy', 'Sincronizando...');
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    products = saved ? JSON.parse(saved) : [];
+    if (direction === 'pull') {
+      const { data } = await sb.from('veredicto_data').select('data').eq('user_id', sbUser.id).single();
+      if (data?.data) {
+        projects = data.data.projects || [];
+        products = data.data.products || {};
+        if (!currentProjectId && projects.length) currentProjectId = projects[0].id;
+        saveLocal();
+      }
+    } else {
+      await sb.from('veredicto_data').upsert({
+        user_id: sbUser.id,
+        data: { projects, products },
+        updated_at: new Date().toISOString()
+      });
+    }
+    setSyncStatus('ok', 'Sincronizado');
   } catch(e) {
-    products = [];
+    setSyncStatus('err', 'Error al sincronizar');
   }
 }
 
-function saveProducts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+function setSyncStatus(state, msg) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.querySelector('.sync-dot').className = 'sync-dot ' + state;
+  el.querySelector('.sync-msg').textContent = msg;
 }
 
-function addProduct(p) {
-  const existing = products.findIndex(x => x.id === p.id);
-  if (existing >= 0) {
-    products[existing] = p;
-    showToast('Producto actualizado', 'ok');
+// ══════════════════════════════════════════════════════
+// ML API
+// ══════════════════════════════════════════════════════
+function extractMlaId(url) {
+  const m = url.match(/MLA-?(\d+)/i);
+  return m ? 'MLA' + m[1] : null;
+}
+
+async function fetchMLProduct(url) {
+  const id = extractMlaId(url);
+  if (!id) throw new Error('No encontré un código de producto (MLA...) en esa URL.');
+
+  const resp = await fetch(`https://api.mercadolibre.com/items/${id}`);
+  if (!resp.ok) throw new Error('Producto no encontrado. Verificá el link.');
+  const item = await resp.json();
+
+  // Specs from attributes
+  const specs = {};
+  (item.attributes || []).forEach(a => {
+    if (a.value_name && a.value_name !== 'N/A') specs[a.name] = a.value_name;
+  });
+
+  // Photos
+  const photos = (item.pictures || [])
+    .map(p => p.secure_url || p.url || '').filter(s => s.startsWith('http')).slice(0, 6);
+  if (!photos.length && item.thumbnail) photos.push(item.thumbnail.replace('-I.jpg', '-O.jpg'));
+
+  // Reviews
+  let rating = null, reviews = null;
+  try {
+    const rr = await fetch(`https://api.mercadolibre.com/reviews/item/${id}`);
+    if (rr.ok) {
+      const rd = await rr.json();
+      if (rd.rating_average) rating = rd.rating_average.toFixed(1);
+      if (rd.paging?.total) reviews = String(rd.paging.total);
+    }
+  } catch {}
+
+  return {
+    id,
+    title: item.title,
+    price: item.price,
+    rating,
+    reviews,
+    specs,
+    photos,
+    link: item.permalink || url,
+    addedAt: new Date().toISOString()
+  };
+}
+
+// ══════════════════════════════════════════════════════
+// PROJECTS
+// ══════════════════════════════════════════════════════
+function createProject() {
+  const name = document.getElementById('new-proj-name').value.trim();
+  if (!name) return;
+  const id = 'p' + Date.now();
+  projects.push({ id, name, createdAt: new Date().toISOString() });
+  products[id] = [];
+  currentProjectId = id;
+  saveLocal();
+  sbSync('push');
+  closeModal('modal-new-project');
+  document.getElementById('new-proj-name').value = '';
+  setView('compare');
+}
+
+function selectProject(id) {
+  currentProjectId = id;
+  localStorage.setItem(LS_PROJECT, id);
+  setView('compare');
+  if (window.innerWidth <= 780) closeSidebar();
+}
+
+function deleteProject(id) {
+  if (!confirm('¿Eliminar esta comparación y todos sus productos?')) return;
+  projects = projects.filter(p => p.id !== id);
+  delete products[id];
+  if (currentProjectId === id) currentProjectId = projects[0]?.id || null;
+  saveLocal();
+  sbSync('push');
+  renderAll();
+}
+
+function addProductToProject(product) {
+  if (!currentProjectId) {
+    showToast('Creá una comparación primero', 'err');
+    return false;
+  }
+  if (!products[currentProjectId]) products[currentProjectId] = [];
+  const exists = products[currentProjectId].findIndex(p => p.id === product.id);
+  if (exists >= 0) {
+    products[currentProjectId][exists] = product;
+    showToast('Producto actualizado');
   } else {
-    products.push(p);
-    showToast('Producto agregado al comparador', 'ok');
+    products[currentProjectId].push(product);
+    showToast('Producto agregado ✓', 'ok');
   }
-  saveProducts();
+  saveLocal();
+  sbSync('push');
+  return true;
 }
 
-function removeProduct(id) {
-  products = products.filter(p => p.id !== id);
-  saveProducts();
-  render();
+function removeProductFromProject(productId) {
+  if (!currentProjectId || !products[currentProjectId]) return;
+  products[currentProjectId] = products[currentProjectId].filter(p => p.id !== productId);
+  saveLocal();
+  sbSync('push');
+  renderContent();
 }
 
-function clearAll() {
-  if (!confirm('¿Eliminar todos los productos del comparador?')) return;
-  products = [];
-  saveProducts();
-  filterMin = null;
-  filterMax = null;
-  document.getElementById('price-min').value = '';
-  document.getElementById('price-max').value = '';
-  render();
+// ══════════════════════════════════════════════════════
+// ADD PRODUCT ACTIONS
+// ══════════════════════════════════════════════════════
+async function fetchByUrl() {
+  const url = document.getElementById('add-url').value.trim();
+  const status = document.getElementById('url-status');
+  const preview = document.getElementById('url-preview');
+  const btnAdd = document.getElementById('btn-add-url');
+  status.className = 'status-msg';
+  status.textContent = 'Buscando...';
+  preview.style.display = 'none';
+  btnAdd.style.display = 'none';
+  urlPendingProduct = null;
+
+  try {
+    const p = await fetchMLProduct(url);
+    urlPendingProduct = p;
+    document.getElementById('pcard-title').textContent = p.title || '';
+    document.getElementById('pcard-price').textContent = p.price ? formatPrice(p.price) : '';
+    document.getElementById('pcard-rating').textContent =
+      p.rating ? `★ ${p.rating}${p.reviews ? ` · ${p.reviews} opiniones` : ''}` : '';
+    const specEntries = Object.entries(p.specs).slice(0, 8);
+    document.getElementById('pcard-specs').innerHTML = specEntries
+      .map(([k,v]) => `${k}: <span>${esc(v)}</span>`).join(' · ');
+    preview.style.display = 'block';
+    btnAdd.style.display = 'block';
+    status.className = 'status-msg ok';
+    status.textContent = `✓ ${Object.keys(p.specs).length} especificaciones encontradas`;
+  } catch(e) {
+    status.className = 'status-msg err';
+    status.textContent = '✕ ' + e.message;
+  }
 }
 
-// ── PRICE PARSING ─────────────────────────────────────────────────────────────
-
-function parsePrice(str) {
-  if (!str && str !== 0) return null;
-  if (typeof str === 'number') return str;
-  // Argentine format: "$ 45.999" or "45.999" or "2.599.990"
-  const s = String(str).replace(/[^\d]/g, '');
-  const n = parseInt(s);
-  return isNaN(n) ? null : n;
+function addFromUrl() {
+  if (!urlPendingProduct) return;
+  if (addProductToProject(urlPendingProduct)) {
+    closeModal('modal-add-product');
+    document.getElementById('add-url').value = '';
+    document.getElementById('url-preview').style.display = 'none';
+    document.getElementById('btn-add-url').style.display = 'none';
+    document.getElementById('url-status').textContent = '';
+    urlPendingProduct = null;
+    renderContent();
+  }
 }
 
-function formatPrice(n) {
-  if (n == null) return null;
-  return '$ ' + n.toLocaleString('es-AR');
+function addManual() {
+  const title = document.getElementById('m-title').value.trim();
+  const status = document.getElementById('manual-status');
+  if (!title) { status.className = 'status-msg err'; status.textContent = 'El nombre es obligatorio'; return; }
+
+  const specsRaw = document.getElementById('m-specs').value.trim();
+  const specs = {};
+  specsRaw.split('\n').forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx > 0) {
+      const k = line.slice(0, idx).trim();
+      const v = line.slice(idx + 1).trim();
+      if (k && v) specs[k] = v;
+    }
+  });
+
+  const product = {
+    id: 'manual_' + Date.now(),
+    title,
+    price: parseFloat(document.getElementById('m-price').value) || null,
+    rating: document.getElementById('m-rating').value || null,
+    reviews: document.getElementById('m-reviews').value || null,
+    specs,
+    photos: [],
+    link: document.getElementById('m-link').value.trim() || null,
+    addedAt: new Date().toISOString()
+  };
+
+  if (addProductToProject(product)) {
+    closeModal('modal-add-product');
+    ['m-title','m-price','m-link','m-rating','m-reviews','m-specs'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    renderContent();
+  }
 }
 
-// ── FILTER ────────────────────────────────────────────────────────────────────
-
-function applyFilter() {
-  const minVal = document.getElementById('price-min').value;
-  const maxVal = document.getElementById('price-max').value;
-  filterMin = minVal ? parseInt(minVal) : null;
-  filterMax = maxVal ? parseInt(maxVal) : null;
-  render();
+// ══════════════════════════════════════════════════════
+// LOGIN ACTIONS
+// ══════════════════════════════════════════════════════
+function switchLoginTab(tab) {
+  ['login','register'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.querySelectorAll('#modal-login .tab-btn').forEach((b,i) => {
+      b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+    });
+  });
+  document.getElementById('login-status').textContent = '';
 }
 
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const status = document.getElementById('login-status');
+  status.className = 'status-msg';
+  status.textContent = 'Entrando...';
+  try {
+    sbUser = await sbLogin(email, pass);
+    await sbSync('pull');
+    closeModal('modal-login');
+    renderAll();
+    showToast('¡Bienvenido!', 'ok');
+  } catch(e) {
+    status.className = 'status-msg err';
+    status.textContent = '✕ ' + e.message;
+  }
+}
+
+async function doRegister() {
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const status = document.getElementById('login-status');
+  status.className = 'status-msg';
+  status.textContent = 'Creando cuenta...';
+  try {
+    sbUser = await sbRegister(email, pass);
+    closeModal('modal-login');
+    renderAll();
+    showToast('Cuenta creada ✓', 'ok');
+  } catch(e) {
+    status.className = 'status-msg err';
+    status.textContent = '✕ ' + e.message;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════
+function renderAll() {
+  renderSidebar();
+  renderContent();
+}
+
+function renderSidebar() {
+  renderUserZone();
+  renderProjectList();
+}
+
+function renderUserZone() {
+  const el = document.getElementById('sb-user');
+  if (sbUser) {
+    const email = sbUser.email || '';
+    const initial = email[0]?.toUpperCase() || '?';
+    el.innerHTML = `<div class="user-info">
+      <div class="user-avatar">${initial}</div>
+      <span class="user-email" title="${esc(email)}">${esc(email)}</span>
+      <button class="btn-logout" onclick="sbLogout()">Salir</button>
+    </div>`;
+  } else {
+    el.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="openModal('modal-login')" style="width:100%">Iniciar sesión</button>`;
+  }
+}
+
+function renderProjectList() {
+  const el = document.getElementById('project-list');
+  if (!projects.length) {
+    el.innerHTML = `<div style="padding:8px 14px;font-size:12px;color:var(--text3)">Sin comparaciones aún</div>`;
+    return;
+  }
+  el.innerHTML = projects.map(p => {
+    const count = (products[p.id] || []).length;
+    const active = p.id === currentProjectId && currentView === 'compare';
+    return `<div class="proj-item ${active ? 'active' : ''}" onclick="selectProject('${p.id}')">
+      <span class="proj-name">${esc(p.name)}</span>
+      <span class="proj-count">${count}</span>
+    </div>`;
+  }).join('');
+}
+
+function setView(view) {
+  currentView = view;
+  renderContent();
+  renderProjectList();
+  // Highlight nav items
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.remove('active');
+    if (el.textContent.toLowerCase().includes(view)) el.classList.add('active');
+  });
+}
+
+function renderContent() {
+  const title = document.getElementById('topbar-title');
+  const right  = document.getElementById('topbar-right');
+  const content = document.getElementById('content');
+
+  if (currentView === 'compare') {
+    const proj = projects.find(p => p.id === currentProjectId);
+    title.textContent = proj ? proj.name : 'Veredicto';
+    const prods = getVisibleProducts();
+    const all   = (products[currentProjectId] || []);
+
+    right.innerHTML = `
+      <div class="filter-group">
+        <label>Precio</label>
+        <input class="filter-input" id="price-min" type="number" placeholder="mín" value="${filterMin||''}">
+        <span class="filter-sep">—</span>
+        <input class="filter-input" id="price-max" type="number" placeholder="máx" value="${filterMax||''}">
+        <button class="btn btn-primary btn-sm" onclick="applyFilter()">Filtrar</button>
+      </div>
+      ${all.length ? `<span class="prod-count"><b>${prods.length}</b>/${all.length}</span>` : ''}
+      ${currentProjectId ? `<button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">+ Agregar</button>` : ''}
+    `;
+
+    if (!projects.length) {
+      content.innerHTML = renderEmpty(
+        '📦', 'Creá tu primera comparación',
+        'Hacé clic en el <strong>+</strong> de la barra lateral para empezar.',
+        `<button class="btn btn-primary" onclick="openModal('modal-new-project')">+ Nueva comparación</button>`
+      );
+    } else if (!all.length) {
+      content.innerHTML = renderEmpty(
+        '🔍', 'Esta comparación está vacía',
+        'Agregá productos desde MercadoLibre para empezar a comparar.',
+        `<button class="btn btn-primary" onclick="openModal('modal-add-product')">+ Agregar producto</button>`
+      );
+    } else if (!prods.length) {
+      content.innerHTML = renderEmpty('🔍', 'Ningún producto en ese rango de precio', 'Ajustá el filtro para ver más resultados.');
+    } else {
+      content.innerHTML = `<div class="cmp-wrap">${renderTable(prods)}</div>`;
+    }
+
+    // Bind filter enter keys
+    ['price-min','price-max'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('keydown', e => { if(e.key==='Enter') applyFilter(); });
+    });
+
+  } else if (currentView === 'instrucciones') {
+    title.textContent = 'Instrucciones';
+    right.innerHTML = '';
+    content.innerHTML = renderInstrucciones();
+  } else if (currentView === 'glosario') {
+    title.textContent = 'Glosario';
+    right.innerHTML = '';
+    content.innerHTML = renderGlosario();
+  } else if (currentView === 'ajustes') {
+    title.textContent = 'Ajustes';
+    right.innerHTML = '';
+    content.innerHTML = renderAjustes();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// COMPARISON TABLE
+// ══════════════════════════════════════════════════════
 function getVisibleProducts() {
-  if (filterMin == null && filterMax == null) return products;
-  return products.filter(p => {
-    const price = parsePrice(p.price);
-    if (price == null) return true;
+  const all = products[currentProjectId] || [];
+  if (filterMin == null && filterMax == null) return all;
+  return all.filter(p => {
+    const price = p.price;
     if (filterMin != null && price < filterMin) return false;
     if (filterMax != null && price > filterMax) return false;
     return true;
   });
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
-
-function render() {
-  const app = document.getElementById('app');
-  const visible = getVisibleProducts();
-  const hidden = products.filter(p => !visible.includes(p));
-
-  // Update header controls
-  const hasProducts = products.length > 0;
-  document.getElementById('btn-clear').style.display = hasProducts ? '' : 'none';
-  document.getElementById('product-count').style.display = hasProducts ? '' : 'none';
-  document.getElementById('count-visible').textContent = visible.length;
-  document.getElementById('count-total').textContent = products.length;
-
-  // Hidden notice
-  const notice = document.getElementById('hidden-notice');
-  if (hidden.length > 0) {
-    notice.textContent = `${hidden.length} producto${hidden.length > 1 ? 's' : ''} oculto${hidden.length > 1 ? 's' : ''} por el filtro de precio`;
-    notice.classList.add('visible');
-  } else {
-    notice.classList.remove('visible');
-  }
-
-  if (products.length === 0) {
-    app.innerHTML = renderEmptyState();
-    return;
-  }
-
-  if (visible.length === 0) {
-    app.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">🔍</div>
-      <h2>Ningún producto en ese rango</h2>
-      <p>Ajustá el filtro de precio o hacé clic en <strong>Limpiar</strong> para ver todos.</p>
-    </div>`;
-    return;
-  }
-
-  app.innerHTML = `<div class="table-wrap">${renderTable(visible)}</div>`;
-}
-
-function renderEmptyState() {
-  return `<div class="empty-state">
-    <div class="empty-icon">📦</div>
-    <h2>No hay productos para comparar</h2>
-    <p>Instalá la extensión Chrome y navegá a cualquier producto en MercadoLibre para agregarlo acá.</p>
-    <div class="empty-steps">
-      <h3>Cómo usar</h3>
-      <ol>
-        <li>Instalá la extensión <strong>ML Comparador</strong> en Chrome</li>
-        <li>Abrí la página de un producto en <strong>mercadolibre.com.ar</strong></li>
-        <li>Hacé clic en el ícono de la extensión y después en <strong>"Agregar al comparador"</strong></li>
-        <li>Repetí con los productos que querés comparar</li>
-      </ol>
-    </div>
-  </div>`;
+function applyFilter() {
+  const minV = document.getElementById('price-min')?.value;
+  const maxV = document.getElementById('price-max')?.value;
+  filterMin = minV ? parseFloat(minV) : null;
+  filterMax = maxV ? parseFloat(maxV) : null;
+  renderContent();
 }
 
 function renderTable(prods) {
-  // Collect all spec keys preserving order of first appearance
   const specKeys = [];
-  const seenKeys = new Set();
-  prods.forEach(p => {
-    Object.keys(p.specs || {}).forEach(k => {
-      if (!seenKeys.has(k)) { seenKeys.add(k); specKeys.push(k); }
-    });
-  });
+  const seen = new Set();
+  prods.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
 
-  // Determine best price
-  const prices = prods.map(p => parsePrice(p.price)).filter(n => n != null);
+  const prices = prods.map(p => p.price).filter(n => n != null);
   const minPrice = prices.length ? Math.min(...prices) : null;
-  const maxPrice = prices.length && prices.length > 1 ? Math.max(...prices) : null;
-
-  // Determine best rating
-  const ratings = prods.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
+  const maxPrice = prices.length > 1 ? Math.max(...prices) : null;
+  const ratings  = prods.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
   const maxRating = ratings.length ? Math.max(...ratings) : null;
 
-  // Build table
-  let html = `<table class="cmp-table">`;
-
-  // HEADER ROW
-  html += `<thead><tr>`;
-  html += `<th class="col-spec header-spec">Característica</th>`;
+  let h = `<table class="cmp-table"><thead><tr>`;
+  h += `<th class="col-spec hd">Característica</th>`;
   prods.forEach(p => {
-    const price = parsePrice(p.price);
-    const isMin = price != null && price === minPrice && prices.length > 1;
-    const isMax = price != null && price === maxPrice && prices.length > 1;
-    const priceClass = isMin ? 'best-price' : isMax ? 'worst-price' : '';
-    const ratingVal = parseFloat(p.rating);
-    const isBestRating = !isNaN(ratingVal) && ratingVal === maxRating && ratings.length > 1;
-
-    const imgHtml = (p.photos && p.photos[0])
-      ? `<img class="product-img" src="${esc(p.photos[0])}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      + `<div class="product-img-placeholder" style="display:none">📦</div>`
-      : `<div class="product-img-placeholder">📦</div>`;
-
-    const ratingHtml = (p.rating || p.reviews)
-      ? `<div class="product-rating">
-          <span class="star">★</span>
-          ${p.rating ? `<span class="rating-val">${esc(p.rating)}</span>` : ''}
-          ${p.reviews ? `<span>(${esc(p.reviews)} opiniones)</span>` : ''}
-          ${isBestRating ? `<span style="color:var(--best);font-size:10px">✓ mejor</span>` : ''}
-        </div>`
-      : '';
-
-    html += `<th class="col-product">
+    const isMin = p.price != null && p.price === minPrice && prices.length > 1;
+    const isMax = p.price != null && p.price === maxPrice && prices.length > 1;
+    const rVal  = parseFloat(p.rating);
+    const isBestR = !isNaN(rVal) && rVal === maxRating && ratings.length > 1;
+    const img = (p.photos && p.photos[0])
+      ? `<img class="product-img" src="${esc(p.photos[0])}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+         <div class="product-img-ph" style="display:none">📦</div>`
+      : `<div class="product-img-ph">📦</div>`;
+    h += `<th class="col-product">
       <div class="product-header">
-        ${imgHtml}
-        <div class="product-name">${esc(p.title || 'Sin título')}</div>
-        <div class="product-price ${priceClass}">
-          ${formatPrice(price) || esc(p.price) || '—'}
-          ${isMin ? `<span style="font-size:11px;font-weight:400;color:var(--best)"> ✓ mejor precio</span>` : ''}
+        ${img}
+        <div class="product-name">${esc(p.title||'Sin nombre')}</div>
+        <div class="product-price ${isMin?'best':isMax?'worst':''}">
+          ${p.price != null ? formatPrice(p.price) : '—'}
+          ${isMin ? `<span style="font-size:11px;font-weight:400"> ✓ mejor</span>` : ''}
         </div>
-        ${ratingHtml}
+        ${p.rating ? `<div class="product-rating"><span class="star">★</span><span style="color:var(--text);font-weight:600">${esc(p.rating)}</span>${p.reviews?` (${esc(p.reviews)})`:''}${isBestR?' <span style="color:var(--best);font-size:10px">✓ mejor</span>':''}</div>` : ''}
         <div class="product-actions">
-          <a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>
-          <button class="btn-remove" onclick="removeProduct('${esc(p.id)}')">Quitar</button>
+          ${p.link ? `<a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>` : ''}
+          <button class="btn-remove" onclick="removeProductFromProject('${esc(p.id)}')">Quitar</button>
         </div>
       </div>
     </th>`;
   });
-  html += `</tr></thead>`;
+  h += `</tr></thead><tbody>`;
 
-  // BODY
-  html += `<tbody>`;
-
-  // PRICE ROW
-  html += `<tr class="row-price">`;
-  html += `<td class="col-spec" style="color:var(--text);font-weight:500">Precio</td>`;
+  // Price row
+  h += `<tr class="row-key"><td class="col-spec">Precio</td>`;
   prods.forEach(p => {
-    const price = parsePrice(p.price);
-    const isBest = price != null && price === minPrice && prices.length > 1;
-    html += `<td class="col-value ${isBest ? 'best-val' : ''}">${formatPrice(price) || esc(p.price) || '—'}</td>`;
+    const isBest = p.price != null && p.price === minPrice && prices.length > 1;
+    h += `<td class="col-value ${isBest?'best-val':''}">${p.price != null ? formatPrice(p.price) : '<span class="empty">—</span>'}</td>`;
   });
-  html += `</tr>`;
+  h += `</tr>`;
 
-  // RATING ROW
-  if (ratings.length > 0) {
-    html += `<tr class="row-rating">`;
-    html += `<td class="col-spec" style="color:var(--text);font-weight:500">Rating</td>`;
+  // Rating row
+  if (ratings.length) {
+    h += `<tr class="row-key"><td class="col-spec">Rating</td>`;
     prods.forEach(p => {
       const r = parseFloat(p.rating);
       const isBest = !isNaN(r) && r === maxRating && ratings.length > 1;
-      const reviewsStr = p.reviews ? ` (${p.reviews})` : '';
-      html += `<td class="col-value ${isBest ? 'best-val' : ''}">
-        ${p.rating ? `★ ${esc(p.rating)}${reviewsStr}` : '<span class="empty-val">—</span>'}
-      </td>`;
+      h += `<td class="col-value ${isBest?'best-val':''}">${p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span class="empty">—</span>'}</td>`;
     });
-    html += `</tr>`;
+    h += `</tr>`;
   }
 
-  // SEPARATOR
-  if (specKeys.length > 0) {
-    html += `<tr class="row-separator"><td colspan="${prods.length + 1}">Especificaciones técnicas</td></tr>`;
+  // Specs
+  if (specKeys.length) {
+    h += `<tr class="row-sep"><td colspan="${prods.length+1}">Especificaciones técnicas</td></tr>`;
+    specKeys.forEach(key => {
+      const vals = prods.map(p => (p.specs||{})[key] || null);
+      if (vals.every(v => v == null)) return;
+      const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
+      h += `<tr><td class="col-spec">${esc(key)}</td>`;
+      vals.forEach(v => {
+        h += `<td class="col-value ${allSame?'muted':''}">${v ? esc(v) : '<span class="empty">—</span>'}</td>`;
+      });
+      h += `</tr>`;
+    });
   }
 
-  // SPEC ROWS
-  specKeys.forEach(key => {
-    const vals = prods.map(p => (p.specs || {})[key] || null);
-    const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
-    const allEmpty = vals.every(v => v == null);
-    if (allEmpty) return;
+  h += `</tbody></table>`;
+  return h;
+}
 
-    html += `<tr>`;
-    html += `<td class="col-spec">${esc(key)}</td>`;
-    vals.forEach(v => {
-      const cls = allSame ? 'all-same' : '';
-      html += `<td class="col-value ${cls}">${v ? esc(v) : '<span class="empty-val">—</span>'}</td>`;
-    });
-    html += `</tr>`;
-  });
+// ══════════════════════════════════════════════════════
+// VIEWS: instrucciones / glosario / ajustes
+// ══════════════════════════════════════════════════════
+function renderInstrucciones() {
+  return `<div class="page-content">
+    <h2>¿Cómo usar Veredicto?</h2>
+    <p class="subtitle">Dos formas de agregar productos: desde el sitio web pegando el link, o más rápido con la extensión de Chrome.</p>
 
-  html += `</tbody></table>`;
-  return html;
+    <div class="section-hd">Desde el sitio web (sin extensión)</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Creá una comparación</h3><p>En la barra lateral, hacé clic en el <strong>+</strong> al lado de "Mis comparaciones" y poné un nombre (ej: Pavas eléctricas).</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Buscá el producto en MercadoLibre</h3><p>Entrá a mercadolibre.com.ar, buscá lo que querés comparar y abrí la página del producto.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Copiá el link y pegalo en "Agregar producto"</h3><p>Volvé a Veredicto, hacé clic en <strong>+ Agregar</strong>, pegá el link en "Por link de ML" y hacé clic en <strong>Buscar producto</strong>.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><h3>Repetí con cada opción</h3><p>Agregá todos los productos que querés comparar. Las especificaciones técnicas se alinean automáticamente en la tabla.</p></div></div>
+    </div>
+
+    <div class="section-hd">Con la extensión de Chrome (más rápido)</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><h3>Instalá la extensión</h3><p>Descargá la extensión desde <a href="https://github.com/mlairion/veredicto/releases" target="_blank">github.com/mlairion/veredicto/releases</a> e instalala en Chrome (Modo desarrollador → Cargar sin empaquetar).</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><h3>Navegá a cualquier producto en ML</h3><p>Estando en la página del producto, hacé clic en el ícono de <strong>Veredicto</strong> en la barra de extensiones.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><h3>Clic en "Agregar al comparador"</h3><p>La extensión extrae los datos y los manda directo a Veredicto en una nueva pestaña.</p></div></div>
+    </div>
+  </div>`;
+}
+
+function renderGlosario() {
+  const terms = [
+    ['MLA', 'Código único de cada publicación en MercadoLibre Argentina (ej: MLA1234567890).'],
+    ['Condición', '"Nuevo" o "Usado". Siempre verificar antes de comprar.'],
+    ['Vendedor oficial', 'Cuenta verificada directamente por la marca. Mayor garantía.'],
+    ['Full (MercadoLibre)', 'Producto almacenado en depósitos de ML. Envío más rápido y confiable.'],
+    ['MercadoPago', 'Sistema de pago de ML. Permite cuotas sin interés y protege la compra.'],
+    ['Garantía oficial', 'Garantía brindada por el fabricante a través de sus canales oficiales.'],
+    ['Garantía de fábrica', 'Garantía directa del fabricante, sin intermediarios.'],
+    ['Reputación del vendedor', 'Indicador (verde/amarillo/rojo) basado en ventas, calificaciones y reclamos.'],
+    ['Opiniones', 'Calificaciones de compradores anteriores. Más de 10 opiniones = más confiable.'],
+    ['Rating', 'Promedio de calificación (1 a 5 estrellas) sobre las opiniones del producto.'],
+    ['Potencia (W)', 'Watts. A más potencia, más rápido calienta/funciona el aparato.'],
+    ['Capacidad (L)', 'Litros. Volumen que puede contener el producto.'],
+    ['Voltaje (V)', 'En Argentina, el estándar es 220V. Verificar antes de comprar un producto importado.'],
+    ['RPM', 'Revoluciones por minuto. Se usa en motores, licuadoras, impresoras, etc.'],
+    ['BTU', 'Unidad de potencia térmica. Se usa en aires acondicionados (más BTU = más frío/calor).'],
+    ['EER / SEER', 'Eficiencia energética de equipos de climatización. Más alto = más eficiente.'],
+    ['Inverter', 'Tecnología de compresores de velocidad variable. Más eficiente y silencioso.'],
+    ['HEPA', 'Filtro de aire de alta eficiencia. Filtra partículas de hasta 0.3 micrones.'],
+    ['NFC', 'Near Field Communication. Permite pagos sin contacto y conexión rápida Bluetooth.'],
+    ['IP44 / IP67', 'Grado de protección contra polvo y agua. IP67 = sumergible hasta 1m por 30 min.'],
+  ];
+  return `<div class="page-content">
+    <h2>Glosario</h2>
+    <p class="subtitle">Términos comunes que aparecen en las fichas técnicas y publicaciones de MercadoLibre.</p>
+    <table class="glossary-table">
+      ${terms.map(([t,d]) => `<tr><td>${esc(t)}</td><td>${esc(d)}</td></tr>`).join('')}
+    </table>
+  </div>`;
+}
+
+function renderAjustes() {
+  const sbUrl = localStorage.getItem(LS_SB_URL) || '';
+  const sbKey = localStorage.getItem(LS_SB_KEY) || '';
+  return `<div class="page-content">
+    <h2>Ajustes</h2>
+    <p class="subtitle">Configurá la sincronización en la nube para acceder a tus comparaciones desde cualquier dispositivo.</p>
+
+    <div class="settings-block">
+      <h3>🔄 Sincronización con Supabase</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6">
+        Creá una cuenta gratuita en <a href="https://supabase.com" target="_blank" style="color:var(--accent)">supabase.com</a>,
+        creá un proyecto y pegá las claves de <strong>Project Settings → API</strong>.
+        Después ejecutá este SQL en <strong>SQL Editor</strong>:
+      </p>
+      <div class="code-block">create table veredicto_data (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  data jsonb not null default '{"projects":[],"products":{}}',
+  updated_at timestamptz not null default now()
+);
+alter table veredicto_data enable row level security;
+create policy "Own data" on veredicto_data
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);</div>
+      <div class="frow" style="margin-top:12px"><label>Project URL</label><input type="text" id="sb-url-input" placeholder="https://xxxx.supabase.co" value="${esc(sbUrl)}"></div>
+      <div class="frow"><label>Anon key</label><input type="password" id="sb-key-input" placeholder="eyJhbGciOiJIUzI1NiIs..." value="${esc(sbKey)}"></div>
+      <button class="btn btn-primary btn-sm" onclick="saveSupabaseConfig()">Guardar y conectar</button>
+      <div id="sync-status" class="sync-status" style="${sb?'':'display:none'}">
+        <div class="sync-dot"></div>
+        <span class="sync-msg">—</span>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <h3>💾 Exportar / Importar datos</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Hacé un backup de todas tus comparaciones o importalas desde otro dispositivo.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="exportData()">Exportar JSON</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file').click()">Importar JSON</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+
+    <div class="settings-block">
+      <h3>🗑️ Borrar datos locales</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Elimina todas las comparaciones del navegador. Esta acción no se puede deshacer.</p>
+      <button class="btn btn-danger btn-sm" onclick="clearAllData()">Borrar todo</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// SETTINGS ACTIONS
+// ══════════════════════════════════════════════════════
+function saveSupabaseConfig() {
+  const url = document.getElementById('sb-url-input').value.trim();
+  const key = document.getElementById('sb-key-input').value.trim();
+  localStorage.setItem(LS_SB_URL, url);
+  localStorage.setItem(LS_SB_KEY, key);
+  initSupabase();
+  showToast('Configuración guardada', 'ok');
+  renderContent();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify({ projects, products }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `veredicto_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.projects) projects = data.projects;
+      if (data.products) products = data.products;
+      if (!currentProjectId && projects.length) currentProjectId = projects[0].id;
+      saveLocal();
+      renderAll();
+      showToast('Datos importados ✓', 'ok');
+    } catch {
+      showToast('Archivo inválido', 'err');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function clearAllData() {
+  if (!confirm('¿Borrar todas las comparaciones y productos? Esta acción no se puede deshacer.')) return;
+  projects = []; products = {}; currentProjectId = null;
+  saveLocal();
+  renderAll();
+  showToast('Datos eliminados');
+}
+
+// ══════════════════════════════════════════════════════
+// HASH IMPORT (from extension)
+// ══════════════════════════════════════════════════════
+function checkHash() {
+  if (!location.hash.startsWith('#import=')) return;
+  try {
+    const p = JSON.parse(decodeURIComponent(location.hash.slice(8)));
+    if (p?.title) {
+      if (!currentProjectId) {
+        const id = 'p' + Date.now();
+        projects.push({ id, name: 'Sin nombre', createdAt: new Date().toISOString() });
+        products[id] = [];
+        currentProjectId = id;
+      }
+      addProductToProject(p);
+    }
+  } catch {}
+  history.replaceState(null, '', location.pathname);
+  renderAll();
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function formatPrice(n) {
+  if (n == null) return '—';
+  return '$ ' + Number(n).toLocaleString('es-AR');
 }
 
 function esc(v) {
   if (v == null) return '';
-  return String(v)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
+function renderEmpty(icon, title, desc, extra='') {
+  return `<div class="empty"><div class="empty-icon">${icon}</div><h2>${title}</h2><p>${desc}</p>${extra}</div>`;
+}
 
 let toastTimer = null;
-function showToast(msg, type = '') {
+function showToast(msg, type='') {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast show' + (type ? ' ' + type : '');
+  el.className = 'toast show' + (type ? ' '+type : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2800);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 2600);
 }
 
-// ── HASH IMPORT ───────────────────────────────────────────────────────────────
-
-function checkHash() {
-  const hash = location.hash;
-  if (!hash.startsWith('#import=')) return;
-  try {
-    const encoded = hash.slice('#import='.length);
-    const data = JSON.parse(decodeURIComponent(encoded));
-    if (data && data.title) {
-      addProduct(data);
-    }
-  } catch(e) {
-    showToast('Error al importar el producto', 'err');
-  }
-  // Clean URL without triggering reload
-  history.replaceState(null, '', location.pathname);
-  render();
+// ══════════════════════════════════════════════════════
+// MODAL & SIDEBAR HELPERS
+// ══════════════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+function switchAddTab(tab) {
+  ['url','manual'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  document.querySelectorAll('#modal-add-product .tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0&&tab==='url')||(i===1&&tab==='manual'));
+  });
+}
 
-loadProducts();
-checkHash();
-render();
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
 
-// Handle hash changes (e.g. extension opens new tab)
-window.addEventListener('hashchange', () => {
-  checkHash();
-  render();
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
 });
 
-// Allow Enter key on price filter
-document.getElementById('price-min').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilter(); });
-document.getElementById('price-max').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilter(); });
+// Enter key on new project
+document.getElementById('new-proj-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createProject();
+});
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+async function init() {
+  loadLocal();
+  initSupabase();
+  if (sb) {
+    const { data } = await sb.auth.getSession();
+    sbUser = data?.session?.user || null;
+    if (sbUser) sbSync('pull');
+  }
+  checkHash();
+  renderAll();
+}
+
+init();
 </script>
 </body>
 </html>
