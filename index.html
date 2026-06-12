@@ -18,6 +18,14 @@
   --radius:8px;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 }
+body.light{
+  --bg:#f4f5f7;--bg2:#ffffff;--bg3:#f0f1f3;--bg4:#e4e5e8;
+  --border:#e0e0e0;--border2:#d0d0d0;--border3:#c0c0c0;
+  --text:#111;--text2:#555;--text3:#aaa;
+  --best-bg:#e8fdf0;--red-bg:#fdf0f0;
+}
+.btn-theme{background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:var(--radius);color:var(--text2);transition:color .1s}
+.btn-theme:hover{color:var(--text)}
 
 /* ── LAYOUT ─────────────────────────────────────────────────────── */
 body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
@@ -137,13 +145,13 @@ body{background:var(--bg);color:var(--text);display:flex;min-height:100vh}
 
 /* ── COMPARISON TABLE ────────────────────────────────────────────── */
 .cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cmp-table{border-collapse:collapse;min-width:max-content;width:100%}
+.cmp-table{border-collapse:collapse;width:100%;table-layout:fixed}
 .col-spec{
   position:sticky;left:0;background:var(--bg2);border-right:1px solid var(--border2);z-index:10;
-  width:155px;min-width:140px;padding:9px 13px;font-size:12px;color:var(--text2);text-align:left;white-space:nowrap;
+  width:160px;min-width:160px;max-width:160px;padding:9px 13px;font-size:12px;color:var(--text2);text-align:left;
 }
 .col-spec.hd{background:var(--bg);border-bottom:1px solid var(--border2);vertical-align:bottom;padding-bottom:10px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-.col-product{min-width:185px;max-width:215px;padding:11px 13px;border-right:1px solid var(--border);vertical-align:top}
+.col-product{width:220px;min-width:220px;max-width:220px;padding:11px 13px;border-right:1px solid var(--border);vertical-align:top}
 .col-product:last-child{border-right:none}
 .product-header{display:flex;flex-direction:column;gap:5px}
 .product-img{width:76px;height:76px;object-fit:contain;border-radius:6px;background:#fff;padding:3px;align-self:center}
@@ -308,6 +316,7 @@ tr.row-key .col-spec{color:var(--text);font-weight:500}
       <div class="logo">ML</div>
       <span class="brand">Veredicto</span>
     </div>
+    <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
   </div>
 
   <div class="sb-user" id="sb-user">
@@ -454,9 +463,13 @@ let products = {};   // { [projectId]: [...] }
 let currentProjectId = null;
 let currentView = 'compare';
 let filterMin = null, filterMax = null;
-let sb = null;       // supabase client
-let sbUser = null;   // logged in user
-let urlPendingProduct = null;  // fetched product waiting to be added
+let hiddenProductIds = new Set();
+let specFilter = '';
+let hideIdentical = false;
+let darkMode = localStorage.getItem('vrd_dark') !== 'false';
+let sb = null;
+let sbUser = null;
+let urlPendingProduct = null;
 
 const LS_PROJECTS = 'vrd_projects';
 const LS_PRODUCTS = 'vrd_products';
@@ -582,7 +595,21 @@ async function fetchMLProduct(url) {
     extractSpecs(item.attributes);
     const photos = (item.pictures || [])
       .map(p => p.url || p.secure_url || '').filter(s => s.startsWith('http')).slice(0, 6);
-    const price = item.buy_box_winner?.price || null;
+    let price = item.buy_box_winner?.price || item.buy_box_winner?.listing_price || item.price || null;
+    // fallback: fetch first child item for price
+    if (!price) {
+      try {
+        const ir = await fetch(`${ML_PROXY}/products/${id}/items?limit=1`);
+        if (ir.ok) {
+          const idata = await ir.json();
+          const firstId = (idata.results || [])[0];
+          if (firstId) {
+            const pr = await fetch(`${ML_PROXY}/items/${firstId}`);
+            if (pr.ok) { const pd = await pr.json(); price = pd.price || null; }
+          }
+        }
+      } catch {}
+    }
     const rating = item.reviews?.rating_average ? String(item.reviews.rating_average.toFixed(1)) : null;
     const reviews = item.reviews?.total ? String(item.reviews.total) : null;
 
@@ -656,8 +683,8 @@ function addProductToProject(product) {
   if (!products[currentProjectId]) products[currentProjectId] = [];
   const exists = products[currentProjectId].findIndex(p => p.id === product.id);
   if (exists >= 0) {
-    products[currentProjectId][exists] = product;
-    showToast('Producto actualizado');
+    showToast('Este producto ya está en la comparación', 'err');
+    return false;
   } else {
     products[currentProjectId].push(product);
     showToast('Producto agregado ✓', 'ok');
@@ -881,6 +908,13 @@ function renderContent() {
         <input class="filter-input" id="price-max" type="number" placeholder="máx" value="${filterMax||''}">
         <button class="btn btn-primary btn-sm" onclick="applyFilter()">Filtrar</button>
       </div>
+      <div class="filter-group">
+        <label>Specs</label>
+        <input class="filter-input" id="spec-filter" type="text" placeholder="buscar..." value="${esc(specFilter)}" style="width:90px">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap">
+          <input type="checkbox" ${hideIdentical?'checked':''} onchange="hideIdentical=this.checked;renderContent()"> Ocultar iguales
+        </label>
+      </div>
       ${all.length ? `<span class="prod-count"><b>${prods.length}</b>/${all.length}</span>` : ''}
       ${currentProjectId ? `<button class="btn btn-primary btn-sm" onclick="openModal('modal-add-product')">+ Agregar</button>` : ''}
     `;
@@ -908,6 +942,8 @@ function renderContent() {
       const el = document.getElementById(id);
       if (el) el.addEventListener('keydown', e => { if(e.key==='Enter') applyFilter(); });
     });
+    const sf = document.getElementById('spec-filter');
+    if (sf) sf.addEventListener('input', e => { specFilter = e.target.value; renderContent(); });
 
   } else if (currentView === 'instrucciones') {
     title.textContent = 'Instrucciones';
@@ -946,39 +982,68 @@ function applyFilter() {
   renderContent();
 }
 
+function toggleProductVisibility(id) {
+  if (hiddenProductIds.has(id)) hiddenProductIds.delete(id);
+  else hiddenProductIds.add(id);
+  renderContent();
+}
+
+function toggleTheme() {
+  darkMode = !darkMode;
+  localStorage.setItem('vrd_dark', darkMode);
+  applyTheme();
+}
+
+function applyTheme() {
+  document.body.classList.toggle('light', !darkMode);
+  const btn = document.getElementById('btn-theme');
+  if (btn) btn.textContent = darkMode ? '🌙' : '☀️';
+}
+
 function renderTable(prods) {
+  // Apply product visibility filter
+  const visProds = prods.filter(p => !hiddenProductIds.has(p.id));
+
   const specKeys = [];
   const seen = new Set();
   prods.forEach(p => Object.keys(p.specs||{}).forEach(k => { if(!seen.has(k)){seen.add(k);specKeys.push(k);} }));
+  const filteredSpecKeys = specKeys.filter(k => {
+    if (specFilter && !k.toLowerCase().includes(specFilter.toLowerCase())) return false;
+    if (hideIdentical) {
+      const vals = visProds.map(p => (p.specs||{})[k] || null);
+      if (vals.every(v => v === vals[0] && v != null)) return false;
+    }
+    return true;
+  });
 
-  const prices = prods.map(p => p.price).filter(n => n != null);
+  const prices = visProds.map(p => p.price).filter(n => n != null);
   const minPrice = prices.length ? Math.min(...prices) : null;
   const maxPrice = prices.length > 1 ? Math.max(...prices) : null;
-  const ratings  = prods.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
+  const ratings  = visProds.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
   const maxRating = ratings.length ? Math.max(...ratings) : null;
 
+  // Header row: all products with eye toggle
   let h = `<table class="cmp-table"><thead><tr>`;
   h += `<th class="col-spec hd">Característica</th>`;
   prods.forEach(p => {
-    const isMin = p.price != null && p.price === minPrice && prices.length > 1;
-    const isMax = p.price != null && p.price === maxPrice && prices.length > 1;
+    const hidden = hiddenProductIds.has(p.id);
+    const isMin = !hidden && p.price != null && p.price === minPrice && prices.length > 1;
+    const isMax = !hidden && p.price != null && p.price === maxPrice && prices.length > 1;
     const rVal  = parseFloat(p.rating);
-    const isBestR = !isNaN(rVal) && rVal === maxRating && ratings.length > 1;
+    const isBestR = !hidden && !isNaN(rVal) && rVal === maxRating && ratings.length > 1;
     const img = (p.photos && p.photos[0])
       ? `<img class="product-img" src="${esc(p.photos[0])}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
          <div class="product-img-ph" style="display:none">📦</div>`
       : `<div class="product-img-ph">📦</div>`;
-    h += `<th class="col-product">
+    h += `<th class="col-product" style="${hidden?'opacity:.35':''}">
       <div class="product-header">
         ${img}
         <div class="product-name">${esc(p.title||'Sin nombre')}</div>
-        <div class="product-price ${isMin?'best':isMax?'worst':''}">
-          ${p.price != null ? formatPrice(p.price) : '—'}
-          ${isMin ? `<span style="font-size:11px;font-weight:400"> ✓ mejor</span>` : ''}
-        </div>
-        ${p.rating ? `<div class="product-rating"><span class="star">★</span><span style="color:var(--text);font-weight:600">${esc(p.rating)}</span>${p.reviews?` (${esc(p.reviews)})`:''}${isBestR?' <span style="color:var(--best);font-size:10px">✓ mejor</span>':''}</div>` : ''}
+        ${!hidden ? `<div class="product-price ${isMin?'best':isMax?'worst':''}">${p.price != null ? formatPrice(p.price) : '—'}${isMin?` <span style="font-size:10px;font-weight:400">✓ mejor</span>`:''}</div>` : ''}
+        ${!hidden && p.rating ? `<div class="product-rating"><span class="star">★</span><span style="color:var(--text);font-weight:600">${esc(p.rating)}</span>${p.reviews?` (${esc(p.reviews)})`:''}${isBestR?' <span style="color:var(--best);font-size:10px">✓</span>':''}</div>` : ''}
         <div class="product-actions">
-          ${p.link ? `<a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>` : ''}
+          ${p.link && !hidden ? `<a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>` : ''}
+          <button class="btn-remove" onclick="toggleProductVisibility('${esc(p.id)}')">${hidden?'👁 Mostrar':'👁 Ocultar'}</button>
           <button class="btn-remove" onclick="removeProductFromProject('${esc(p.id)}')">Quitar</button>
         </div>
       </div>
@@ -989,32 +1054,38 @@ function renderTable(prods) {
   // Price row
   h += `<tr class="row-key"><td class="col-spec">Precio</td>`;
   prods.forEach(p => {
-    const isBest = p.price != null && p.price === minPrice && prices.length > 1;
-    h += `<td class="col-value ${isBest?'best-val':''}">${p.price != null ? formatPrice(p.price) : '<span class="empty">—</span>'}</td>`;
+    const hidden = hiddenProductIds.has(p.id);
+    const isBest = !hidden && p.price != null && p.price === minPrice && prices.length > 1;
+    h += `<td class="col-value ${hidden?'muted':isBest?'best-val':''}">${!hidden && p.price != null ? formatPrice(p.price) : '<span class="empty">—</span>'}</td>`;
   });
   h += `</tr>`;
 
   // Rating row
-  if (ratings.length) {
+  const allRatings = prods.map(p => parseFloat(p.rating)).filter(n => !isNaN(n));
+  if (allRatings.length) {
     h += `<tr class="row-key"><td class="col-spec">Rating</td>`;
     prods.forEach(p => {
+      const hidden = hiddenProductIds.has(p.id);
       const r = parseFloat(p.rating);
-      const isBest = !isNaN(r) && r === maxRating && ratings.length > 1;
-      h += `<td class="col-value ${isBest?'best-val':''}">${p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span class="empty">—</span>'}</td>`;
+      const isBest = !hidden && !isNaN(r) && r === maxRating && ratings.length > 1;
+      h += `<td class="col-value ${hidden?'muted':isBest?'best-val':''}">${!hidden && p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span class="empty">—</span>'}</td>`;
     });
     h += `</tr>`;
   }
 
   // Specs
-  if (specKeys.length) {
+  if (filteredSpecKeys.length) {
     h += `<tr class="row-sep"><td colspan="${prods.length+1}">Especificaciones técnicas</td></tr>`;
-    specKeys.forEach(key => {
+    filteredSpecKeys.forEach(key => {
       const vals = prods.map(p => (p.specs||{})[key] || null);
       if (vals.every(v => v == null)) return;
-      const allSame = vals.every(v => v === vals[0]) && vals[0] != null;
+      const visVals = visProds.map(p => (p.specs||{})[key] || null);
+      const allSame = visVals.every(v => v === visVals[0]) && visVals[0] != null;
       h += `<tr><td class="col-spec">${esc(key)}</td>`;
-      vals.forEach(v => {
-        h += `<td class="col-value ${allSame?'muted':''}">${v ? esc(v) : '<span class="empty">—</span>'}</td>`;
+      prods.forEach((p, i) => {
+        const hidden = hiddenProductIds.has(p.id);
+        const v = vals[i];
+        h += `<td class="col-value ${hidden?'muted':allSame?'muted':''}">${!hidden && v ? esc(v) : '<span class="empty">—</span>'}</td>`;
       });
       h += `</tr>`;
     });
@@ -1267,6 +1338,7 @@ document.getElementById('new-proj-name').addEventListener('keydown', e => {
 // INIT
 // ══════════════════════════════════════════════════════
 async function init() {
+  applyTheme();
   loadLocal();
   initSupabase();
   if (sb) {
