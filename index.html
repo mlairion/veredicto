@@ -651,7 +651,7 @@ async function fetchMLProduct(url) {
     const rating = item.reviews?.rating_average ? String(item.reviews.rating_average.toFixed(1)) : null;
     const reviews = item.reviews?.total ? String(item.reviews.total) : null;
 
-    return { id, title: item.name, price, rating, reviews, specs, photos, link: url, addedAt: new Date().toISOString() };
+    return { id, title: item.name, price, rating, reviews, specs, photos, link: url, addedAt: new Date().toISOString(), priceHistory: price != null ? [{price, date: new Date().toISOString()}] : [] };
 
   } else {
     // Items API (regular listings)
@@ -675,7 +675,8 @@ async function fetchMLProduct(url) {
       }
     } catch {}
 
-    return { id, title: item.title, price: item.price, rating, reviews, specs, photos, link: item.permalink || url, addedAt: new Date().toISOString() };
+    const itemPrice = item.price;
+    return { id, title: item.title, price: itemPrice, rating, reviews, specs, photos, link: item.permalink || url, addedAt: new Date().toISOString(), priceHistory: itemPrice != null ? [{price: itemPrice, date: new Date().toISOString()}] : [] };
   }
 }
 
@@ -730,6 +731,29 @@ function addProductToProject(product) {
   saveLocal();
   sbSync('push');
   return true;
+}
+
+async function refreshPrice(productId) {
+  if (!currentProjectId || !products[currentProjectId]) return;
+  const prod = products[currentProjectId].find(p => p.id === productId);
+  if (!prod || !prod.link) return;
+  showToast('Actualizando precio...');
+  try {
+    const fresh = await fetchMLProduct(prod.link);
+    if (fresh.price == null) { showToast('No se pudo obtener el precio', 'err'); return; }
+    prod.price = fresh.price;
+    if (!prod.priceHistory) prod.priceHistory = [];
+    const last = prod.priceHistory[prod.priceHistory.length - 1];
+    if (!last || last.price !== fresh.price) {
+      prod.priceHistory.push({ price: fresh.price, date: new Date().toISOString() });
+    }
+    saveLocal();
+    sbSync('push');
+    renderContent();
+    showToast('Precio actualizado ✓', 'ok');
+  } catch(e) {
+    showToast('Error: ' + e.message, 'err');
+  }
 }
 
 function removeProductFromProject(productId) {
@@ -803,16 +827,18 @@ function addManual() {
     }
   });
 
+  const manualPrice = parseFloat(document.getElementById('m-price').value) || null;
   const product = {
     id: 'manual_' + Date.now(),
     title,
-    price: parseFloat(document.getElementById('m-price').value) || null,
+    price: manualPrice,
     rating: document.getElementById('m-rating').value || null,
     reviews: document.getElementById('m-reviews').value || null,
     specs,
     photos: [],
     link: document.getElementById('m-link').value.trim() || null,
-    addedAt: new Date().toISOString()
+    addedAt: new Date().toISOString(),
+    priceHistory: manualPrice != null ? [{price: manualPrice, date: new Date().toISOString()}] : []
   };
 
   if (addProductToProject(product)) {
@@ -1164,6 +1190,7 @@ function renderTable(prods) {
         ${p.rating ? `<div class="product-rating"><span class="star">★</span><b>${esc(p.rating)}</b>${p.reviews?` (${esc(p.reviews)})`:''}${isBestR?' <span style="color:var(--best);font-size:10px">✓</span>':''}</div>` : ''}
         <div class="product-actions">
           ${p.link ? `<a class="btn-link" href="${esc(p.link)}" target="_blank">Ver en ML</a>` : ''}
+          ${p.link ? `<button class="btn-remove" onclick="refreshPrice('${esc(p.id)}')" title="Actualizar precio">🔄</button>` : ''}
           <button class="btn-remove" onclick="removeProductFromProject('${esc(p.id)}')">Quitar</button>
         </div>
       </div>
@@ -1175,7 +1202,21 @@ function renderTable(prods) {
   h += `<tr class="row-key"><td class="col-spec">Precio</td>`;
   visProds.forEach(p => {
     const isBest = p.price != null && p.price === minPrice && prices.length > 1;
-    h += `<td class="col-value ${isBest?'best-val':''}">${p.price != null ? formatPrice(p.price) : '<span class="empty">—</span>'}</td>`;
+    let priceCell = '<span style="color:var(--text3)">—</span>';
+    if (p.price != null) {
+      const hist = p.priceHistory || [];
+      const first = hist.length > 1 ? hist[0].price : null;
+      let trend = '';
+      if (first != null && first !== p.price) {
+        const diff = p.price - first;
+        const pct = Math.round(Math.abs(diff) / first * 100);
+        trend = diff > 0
+          ? ` <span style="color:var(--red);font-size:10px">↑${pct}%</span>`
+          : ` <span style="color:var(--best);font-size:10px">↓${pct}%</span>`;
+      }
+      priceCell = formatPrice(p.price) + trend;
+    }
+    h += `<td class="col-value ${isBest?'best-val':''}">${priceCell}</td>`;
   });
   h += `</tr>`;
 
@@ -1185,7 +1226,7 @@ function renderTable(prods) {
     visProds.forEach(p => {
       const r = parseFloat(p.rating);
       const isBest = !isNaN(r) && r === maxRating && ratings.length > 1;
-      h += `<td class="col-value ${isBest?'best-val':''}">${p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span class="empty">—</span>'}</td>`;
+      h += `<td class="col-value ${isBest?'best-val':''}">${p.rating ? `★ ${esc(p.rating)}${p.reviews?` (${esc(p.reviews)})`:''}`:'<span style="color:var(--text3)">—</span>'}</td>`;
     });
     h += `</tr>`;
   }
