@@ -636,9 +636,19 @@ async function fetchMLProduct(url) {
     const photos = (item.pictures || [])
       .map(p => p.url || p.secure_url || '').filter(s => s.startsWith('http')).slice(0, 6);
     let price = item.buy_box_winner?.price || item.buy_box_winner?.listing_price || item.price || null;
+    if (!price) {
+      try {
+        // Buscar listings de este catalog_product_id y tomar el precio mínimo
+        const sr = await fetch(`${ML_PROXY}/sites/MLA/search?catalog_product_id=${id}&limit=20`);
+        if (sr.ok) {
+          const sd = await sr.json();
+          const prices = (sd.results || []).map(r => r.price).filter(p => p != null && p > 0);
+          if (prices.length) price = Math.min(...prices);
+        }
+      } catch {}
+    }
     if (!price && item.name) {
       try {
-        // Search by product name to get a real listing price
         const sr = await fetch(`${ML_PROXY}/sites/MLA/search?q=${encodeURIComponent(item.name)}&limit=5`);
         if (sr.ok) {
           const sd = await sr.json();
